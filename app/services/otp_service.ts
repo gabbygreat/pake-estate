@@ -2,7 +2,7 @@ import redis from "@adonisjs/redis/services/main";
 import { randomString } from "../utils.js";
 
 interface CodeType {
-        user_id:number,
+        user_id:string,
         code_type: 'email_verification'|'password_reset'|'login_otp',
         time_to_live?:number
 }
