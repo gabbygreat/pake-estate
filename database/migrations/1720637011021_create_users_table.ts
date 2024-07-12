@@ -17,7 +17,7 @@ export default class extends BaseSchema {
       table.string('postal_code').nullable()
       table.boolean('email_verified').defaultTo(false)
       table.timestamp('email_verified_at').nullable()
-      table.json('country').notNullable()//{country_name:string,country_code:string}
+      table.json('country').nullable().defaultTo({country_name:'',country_code:''})//{country_name:string,country_code:string}
       table.string('email', 254).notNullable().unique()
       table.string('password').notNullable()
       table.string('profile_picture').nullable()
