@@ -120,16 +120,62 @@ export default class UsersController {
         }
     }
 
-    async forgotPasswordRequest({}:HttpContext){
-
+    async forgotPasswordRequest({request,response}:HttpContext){
+        try {
+            const { email } = request.params()
+            const user = await User.findBy('email',email)
+            if(user){
+                if(!user.email_verified){
+                    const prevOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification'})
+                    //TODO::SEND EMAIL
+                    return sendSuccess(response,{message:'Please verify your email address before this action.'})
+                }else{
+                    const prevOTP = await this.otpService.getRedisCode({user_id:user.id,code_type:'password_reset'})
+                    if(prevOTP){
+                        //send the OTP
+                        return sendSuccess(response,{message:'Password reset OTP sent'})
+                    }
+                }
+            }else{
+                return sendError(response,{code:404,message:'Account not found'})
+            }
+        } catch (error) {
+            return sendError(response,{code:500,error:error,message:error.message})
+        }
     }
 
-    async resetPassword({}:HttpContext){
-
+    async resetPassword({request,response}:HttpContext){
+        try {
+            const { password,token,email } = request.body()
+            const user = await User.findBy('email',email)
+            if(user){
+                const prevOTP = await this.otpService.getRedisCode({user_id:user.id,code_type:'password_reset'})
+                if(prevOTP && prevOTP === token){
+                    user.password = password
+                    await user.save()
+                    return sendSuccess(response,{message:'Password reset successful'})
+                }else{
+                    return sendError(response,{message:'Invalid or expired token', code:400})
+                }
+            }else{
+                return sendError(response,{message:'Invalid account', code:400})
+            }
+        } catch (error) {
+            return sendError(response,{message: error.message, code:500})
+        }
     }
 
-    async logout({}:HttpContext){
-
+    async logout({response,auth}:HttpContext){
+        try {
+            const user = auth.use('api').user
+            if(user){
+                await User.accessTokens.delete(user,user.currentAccessToken.identifier)
+            }else{
+                return sendError(response,{message:'Unauthorized', code:401})
+            }
+        } catch (error) {
+            return sendError(response,{message: error.message, code:500})
+        }
     }
 
     async profile({}:HttpContext){
