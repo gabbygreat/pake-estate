@@ -17,3 +17,19 @@ createRegistrationValidator.messagesProvider = new SimpleMessagesProvider({
     "phone_number.required":"A valid mobile number is required"
 },
 {firstname:"FirstName",email:"Email",password:"Password",lastname:"LastName",phone_number:'MobileNumber'})
+
+
+
+
+export const googleLoginValidator = vine.compile(
+    vine.object({
+        access_token: vine.string(),
+        source: vine.enum(['google','facebook','apple'])
+    })
+)
+
+googleLoginValidator.messagesProvider = new SimpleMessagesProvider({
+    "access_token.required":"Access Token is required",
+    "source.required":"Invalid source selected"
+},
+{access_token:"Access Token"})

@@ -1,18 +1,20 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import OTPService from '#services/otp_service'
 import { sendError, sendSuccess } from '../utils.js'
-import { createRegistrationValidator } from '#validators/register'
+import { createRegistrationValidator, googleLoginValidator } from '#validators/register'
 import { createLoginValidator } from '#validators/login'
 import { createEmailVerificationValidator } from '#validators/email_verification'
 import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import { inject } from '@adonisjs/core'
+import LoginService from '#services/login_service'
 
 @inject()
 export default class UsersController {
 
     constructor(
-         protected otpService:OTPService
+         protected otpService:OTPService,
+         protected loginService:LoginService
     ){}
 
     async register({request,response}:HttpContext){
@@ -70,8 +72,21 @@ export default class UsersController {
         }
     }
 
-    async registerOtherSource({}:HttpContext){
+    async registerOtherSource({ request, response }:HttpContext){
+        try {
+            const { access_token, source }= request.body()
 
+            await request.validateUsing(googleLoginValidator)
+
+            if(source === 'google'){
+                return await this.loginService.googleLoginService(access_token)
+            }else{
+                return sendError(response,{message:'Invalid source selected'})
+            }
+
+        } catch (error) {
+            return sendError(response,{code:500,error:error,message:error.message})
+        }
     }
 
     async login({request,response}:HttpContext){
@@ -101,9 +116,18 @@ export default class UsersController {
         }
     }
 
-    async loginOtherSource({request,auth,response}:HttpContext){
+    async loginOtherSource({request,response}:HttpContext){
         try {
-            
+            const { access_token, source }= request.body()
+
+            await request.validateUsing(googleLoginValidator)
+
+            if(source === 'google'){
+                return await this.loginService.googleLoginService(access_token)
+            }else{
+                return sendError(response,{message:'Invalid source selected'})
+            }
+
         } catch (error) {
             return sendError(response,{code:500,error:error,message:error.message})
         }
