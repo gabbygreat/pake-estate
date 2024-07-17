@@ -28,6 +28,80 @@ export default class Property extends BaseModel {
   @column()
   declare total_purchases: number
 
+  @column()
+  declare ask_price: number
+
+  @column()
+  declare show_pricing: number
+
+  @column()
+  declare property_title: string
+
+  @column()
+  declare property_type: string
+
+  @column()
+  declare unit_number: string
+
+  @column()
+  declare general_capacity: number
+
+  @column()
+  declare landmarks: string
+
+  @column()
+  declare independent_spaces: string
+
+  @column()
+  declare house_number: string
+
+  @column()
+  declare street_name: string
+
+  @column()
+  declare city: string
+
+  @column()
+  declare postal_code: string
+
+  @column()
+  declare state: string
+
+  @column()
+  declare country: string
+
+
+  @column()
+  declare longitude: string
+
+
+  @column()
+  declare latitude: string
+
+  @column()
+  declare available: boolean
+
+  @column()
+  declare pet_policy: string
+
+  @column()
+  declare maintainance_information: string
+
+  @column()
+  declare furnishing: 'furnished'|'semi-furnished'|'fully-furnished'
+
+  @column()
+  declare general_rent_fee: number
+
+  @column()
+  declare general_lease_time: string
+
+  @column()
+  declare general_renewal_cycle: string
+
+  @column()
+  declare security_deposit: number
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
