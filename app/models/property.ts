@@ -2,7 +2,18 @@ import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { HasOne } from '@adonisjs/lucid/types/relations'
 import { hasOne } from '@adonisjs/lucid/orm'
+import { HasMany } from '@adonisjs/lucid/types/relations'
+import { hasMany } from '@adonisjs/lucid/orm'
 import User from './user.js'
+import PropertyAmenity from './property_amenity.js'
+import PropertyDocument from './property_document.js'
+import PropertyFee from './property_fee.js'
+import PropertyLegalRequirement from './property_legal_requirement.js'
+import PropertyMedia from './property_media.js'
+import PropertySection from './property_section.js'
+import PropertyTenancyRequest from './property_tenancy_request.js'
+import PropertyTenant from './property_tenant.js'
+import PropertyUtility from './property_utility.js'
 export default class Property extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
@@ -102,6 +113,13 @@ export default class Property extends BaseModel {
   @column()
   declare security_deposit: number
 
+
+  @column()
+  declare owner_contact_details: string
+
+  @column()
+  declare manager_contact_details: string
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -110,4 +128,31 @@ export default class Property extends BaseModel {
 
   @hasOne(()=>User,{foreignKey:'id', localKey:'owner_id'})
   declare owner:HasOne<typeof User>
+
+  @hasMany(()=>PropertyAmenity,{foreignKey:'property', localKey:'id'})
+  declare amenities:HasMany<typeof PropertyAmenity>
+
+  @hasMany(()=>PropertyDocument,{foreignKey:'property', localKey:'id'})
+  declare documents:HasMany<typeof PropertyDocument>
+
+  @hasMany(()=>PropertyFee,{foreignKey:'property', localKey:'id'})
+  declare fees:HasMany<typeof PropertyFee>
+
+  @hasMany(()=>PropertyLegalRequirement,{foreignKey:'property', localKey:'id'})
+  declare legalRequirements:HasMany<typeof PropertyLegalRequirement>
+
+  @hasMany(()=>PropertyMedia,{foreignKey:'property', localKey:'id'})
+  declare mediaItems:HasMany<typeof PropertyMedia>
+
+  @hasMany(()=>PropertySection,{foreignKey:'property', localKey:'id'})
+  declare sections:HasMany<typeof PropertySection>
+
+  @hasMany(()=>PropertyTenancyRequest,{foreignKey:'property', localKey:'id'})
+  declare tenancyRequests:HasMany<typeof PropertyTenancyRequest>
+
+  @hasMany(()=>PropertyTenant,{foreignKey:'property', localKey:'id'})
+  declare tenants:HasMany<typeof PropertyTenant>
+
+  @hasMany(()=>PropertyUtility,{foreignKey:'property', localKey:'id'})
+  declare utilities:HasMany<typeof PropertyUtility>
 }
