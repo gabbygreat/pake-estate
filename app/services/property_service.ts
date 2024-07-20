@@ -4,6 +4,7 @@ import { sendError, sendSuccess } from "../utils.js";
 import PropertyAmenity from "#models/property_amenity";
 import db from "@adonisjs/lucid/services/db";
 import PropertyUtility from "#models/property_utility";
+import PropertyFee from "#models/property_fee";
 
 export type DocumentationStages = 
 'PROPERTY_INFORMATION'|
@@ -126,8 +127,48 @@ export default class PropertyService{
         }
     }
 
-    async handleFinancialInformation(){
+    async handleFinancialInformation(request:Request,response:Response){
+        try {
+            type Fee = Array<Partial<PropertyFee>>
+            const id = request.input('id')
+            const additionalFees:Fee = request.input('additional_fees')
+            const toAdd:Fee = []
+            const toDelete:string[] = []
+            await db.transaction(async(client)=>{
+                const prevFees = await PropertyFee.query({client}).select(['id','name','amount']).where('property','=',id)
+                if(prevFees.length){
+                    //Go through DB list to update or mark existing records for deletion
+                    for(let fee of prevFees){
+                        const feeIndex = additionalFees.findIndex((e)=>e.id === fee.id)
+                        if(feeIndex < 0){
+                            toDelete.push(fee.id)
+                        }else{
+                            fee.amount = additionalFees[feeIndex].amount!
+                            fee.name = additionalFees[feeIndex].name!
+                            await fee.useTransaction(client).save()
+                        }
+                    }
+                    //GO through the Request list to add new items
+                    additionalFees.forEach((e)=>{
+                        if(!e.id){
+                            toAdd.push({name:e.name,amount:e.amount,property:id})
+                        }
+                    })
+                }else{
+                    additionalFees.forEach((e)=>{toAdd.push({property:id,name:e.name,amount:e.amount})})
+                }
+                await PropertyFee.createMany(toAdd,{client}) //Now create the newly added additonal fees
+                await PropertyFee.query({client}).whereIn('id',toDelete).delete() //Now delete all fees removed from the client side
+                const { general_rent_fee, general_lease_time, general_renewal_cycle, security_deposit } = request.body()
+                await Property.query({client}).update({
+                    general_rent_fee, general_lease_time, general_renewal_cycle, security_deposit
+                }).where('id','=',id) //Now updated the property fee records
 
+                return sendSuccess(response,{message:"Financial information updated"})
+            })
+        } catch (error) {
+            throw error
+        }
     }
 
     async handlePropertyContact(){
