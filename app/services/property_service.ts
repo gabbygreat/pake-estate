@@ -17,7 +17,7 @@ export type DocumentationStages =
 export default class PropertyService{
 
 
-    async handlePropertyInformation(request:Request,response:Response){
+    async handlePropertyInformation(request:Request,response:Response,owner:string){
         try {
             //Validate the request
             const {
@@ -53,6 +53,7 @@ export default class PropertyService{
             property.country = country
             property.longitude = longitude
             property.latitude = latitude
+            property.owner_id = property.owner_id ?? owner
             await property.save()
             return sendSuccess(response,{message:"Property information updated",data:property})
         } catch (error) {
@@ -171,11 +172,11 @@ export default class PropertyService{
         }
     }
 
-    async handlePropertyContact(){
+    async handlePropertyMediaUpload(){
 
     }
 
-    async handlePropertyMedia(){
+    async handlePropertyContact(){
 
     }
 
