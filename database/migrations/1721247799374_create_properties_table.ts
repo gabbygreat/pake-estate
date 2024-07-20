@@ -39,6 +39,8 @@ export default class extends BaseSchema {
       table.string('general_lease_time').nullable()
       table.string('general_renewal_cycle').nullable()
       table.decimal('security_deposit').nullable()
+      table.json('owner_contact_details').defaultTo(JSON.stringify([]))
+      table.json('manager_contact_details').defaultTo(JSON.stringify([]))
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })
