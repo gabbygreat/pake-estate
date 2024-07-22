@@ -34,14 +34,6 @@ export default class PropertiesController {
         }
     }
 
-    async addPropertyMedia(){
-        try {
-            
-        } catch (error) {
-            
-        }
-    }
-
     async removePropertyMedia(){
         try {
             

@@ -8,7 +8,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       //table.increments('id')
       table.uuid('id').primary().defaultTo(this.db.rawQuery('uuid_generate_v4()').knexQuery)
-      table.uuid('owner_id').notNullable().references('id').inTable('users')
+      table.uuid('owner_id').notNullable().references('id').inTable('users').onDelete('CASCADE')
       table.enu('current_state', ['draft', 'published']).notNullable()
       table.string('flagged').nullable()
       table.integer('total_reviews').defaultTo(0)

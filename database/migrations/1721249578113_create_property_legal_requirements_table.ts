@@ -10,8 +10,7 @@ export default class extends BaseSchema {
       table.string('name').nullable()
       table.string('description').nullable()
       table.string('document_url').nullable()
-      table.string('property').nullable()
-
+      table.uuid('property').references('id').inTable('properties').onDelete('CASCADE')
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })

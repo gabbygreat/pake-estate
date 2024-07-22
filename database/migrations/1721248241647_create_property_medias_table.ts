@@ -10,7 +10,7 @@ export default class extends BaseSchema {
       table.string('media_url').nullable()
       table.string('media_type').nullable()
       table.string('media_thumbnail_url').nullable()
-      table.string('property').nullable()
+      table.uuid('property').references('id').inTable('properties').onDelete('CASCADE')
 
       table.timestamp('created_at')
       table.timestamp('updated_at')
