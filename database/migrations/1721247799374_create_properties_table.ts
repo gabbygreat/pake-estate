@@ -18,6 +18,7 @@ export default class extends BaseSchema {
       table.decimal('ask_price').defaultTo(0)
       table.boolean('show_pricing').defaultTo(true)
       table.string('property_title').nullable()
+      table.text('property_description').nullable()
       table.string('property_type').nullable()
       table.string('unit_number').nullable()
       table.integer('general_capacity').nullable()

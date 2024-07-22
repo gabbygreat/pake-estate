@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
-import { HasOne } from '@adonisjs/lucid/types/relations'
+import type { HasOne } from '@adonisjs/lucid/types/relations'
 import { hasOne } from '@adonisjs/lucid/orm'
-import { HasMany } from '@adonisjs/lucid/types/relations'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { hasMany } from '@adonisjs/lucid/orm'
 import User from './user.js'
 import PropertyAmenity from './property_amenity.js'
@@ -50,6 +50,9 @@ export default class Property extends BaseModel {
 
   @column()
   declare property_type: string
+
+  @column()
+  declare property_description: string
 
   @column()
   declare unit_number: string
