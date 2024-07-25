@@ -3,6 +3,7 @@ import FileUploadService from '#services/fileupload_service'
 import PropertyService, { DocumentationStages } from '#services/property_service'
 import { sendError, sendSuccess } from '../utils.js'
 import PropertyMedia from '#models/property_media'
+import Property from '#models/property'
 export default class PropertiesController {
     constructor(
          protected uploadService:FileUploadService,
@@ -66,12 +67,32 @@ export default class PropertiesController {
     async listProperties({request,response}:HttpContext){
         try {
             interface Filter {
+                owner?:boolean //IF THIS IS OWNER,FETCH BOTH PUBLISHED AND UNPUBLISHED ELSE FETCH ONLY PUBLISHED
                 search?: string
                 sort?:'recent'|'oldest'
                 page?: number
                 perPage?:number
             }
             const input:Filter = request.qs()
+            const query = Property.query()
+            .select('*')
+            .where('property_title','!=',"")
+            .preload('mediaItems',(media)=>{
+                media.select(['id','media_url','media_type'])
+            })
+            if(input.search){
+                query.andWhere((q)=>{
+                    q.whereRaw('property_title % ? OR property_description % ?',Array(2).fill(input.search))
+                })
+            }
+            
+            !input.owner ? query.andWhere('current_state','=','published') : (()=>{})()
+
+            if(input.sort){
+                query.orderBy('created_at', input.sort === 'oldest' ? 'asc' : 'desc')
+            }
+            const data = await query.paginate(input.page ?? 1, input.perPage ?? 20)
+            return sendSuccess(response,{message:"Property listing", data})
         } catch (error) {
             return sendError(response,{message:error.message,code:500})
         }
