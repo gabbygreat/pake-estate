@@ -14,6 +14,7 @@ import PropertySection from './property_section.js'
 import PropertyTenancyRequest from './property_tenancy_request.js'
 import PropertyTenant from './property_tenant.js'
 import PropertyUtility from './property_utility.js'
+import PropertyReview from './property_review.js'
 export default class Property extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
@@ -158,4 +159,7 @@ export default class Property extends BaseModel {
 
   @hasMany(()=>PropertyUtility,{foreignKey:'property', localKey:'id'})
   declare utilities:HasMany<typeof PropertyUtility>
+
+  @hasMany(()=>PropertyReview,{foreignKey:'property', localKey:'id'})
+  declare reviews:HasMany<typeof PropertyReview>
 }

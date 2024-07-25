@@ -64,6 +64,7 @@ export default class PropertiesController {
         }
     }
 
+
     async listProperties({request,response}:HttpContext){
         try {
             interface Filter {
