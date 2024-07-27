@@ -45,13 +45,16 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare postal_code: string
 
   @column()
-  declare email_verified: string
+  declare email_verified: boolean
 
   @column()
   declare country: string
 
   @column()
   declare profile_picture: string
+
+  @column()
+  declare email_verified_at: Date
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

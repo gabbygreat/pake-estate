@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 
-export default class AdminAccessToken extends BaseModel {
+export default class PropertyDocument extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
