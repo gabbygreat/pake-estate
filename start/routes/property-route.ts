@@ -7,5 +7,6 @@ router.group(()=>{
     router.delete('remove-property-media',[PropertyController,'removePropertyMedia'])
     router.get('list-property-media',[PropertyController,'listPropertyMedia'])
     router.get('list-properties',[PropertyController,'listProperties'])
+    router.get('info/:id',[PropertyController,'propertyInfo'])
 
 }).prefix('/property')

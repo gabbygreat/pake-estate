@@ -98,4 +98,39 @@ export default class PropertiesController {
             return sendError(response,{message:error.message,code:500})
         }
     }
+
+    public async propertyInfo({request,response}:HttpContext){
+        try {
+            const {id} = request.params()
+            const data = await Property.query().select('*')
+            .preload('amenities',(am)=>{
+                am.select(['id','name'])
+            })
+            // .preload('documents',(dc)=>{
+            //     dc.select('*')
+            // })
+            .preload('fees',(fee)=>{
+                fee.select(['id','name','amount'])
+            })
+            .preload('legalRequirements',(legalDoc)=>{
+                legalDoc.select('*')
+            })
+            .preload('owner',(owner)=>{
+                owner.select('*') //TODO:OPTIMIZE
+            })
+            .preload('utilities',(utility)=>{
+                utility.select('*')
+            })
+            .preload('mediaItems',(media)=>{
+                media.select(['id',"media_url","media_type"])
+            }).where('id','=',id)
+           if(data){
+            return sendSuccess(response,{data,message:"Property information"})
+           }else{
+            return sendError(response,{message:"Property not found",code:404})
+           }
+        } catch (error) {
+            return sendError(response,{message:error.message,code:500})
+        }
+    }
 }
