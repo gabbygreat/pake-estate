@@ -5,6 +5,7 @@ import { sendError, sendSuccess } from '../utils.js'
 import PropertyMedia from '#models/property_media'
 import Property from '#models/property'
 import PropertyReview from '#models/property_review'
+import { createReviewValidator } from '#validators/review'
 export default class PropertiesController {
     constructor(
          protected uploadService:FileUploadService,
@@ -139,6 +140,7 @@ export default class PropertiesController {
         try {
             const user = auth.use('api').user
             const { review, rating, property_id} = request.body()
+            await request.validateUsing(createReviewValidator)
             const data:Partial<PropertyReview> = {
                 property:property_id,
                 rating,
@@ -149,7 +151,7 @@ export default class PropertiesController {
             await this.propertyService.updateRatingandReview(property_id)
             return sendSuccess(response,{message:"Review submitted",})
         } catch (error) {
-            
+            return sendError(response,{error:error,message:error.message})
         }
     }
 }
