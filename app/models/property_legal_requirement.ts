@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
-import { BelongsTo } from '@adonisjs/lucid/types/relations'
-import { belongsTo } from '@adonisjs/lucid/orm'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { belongsTo }from '@adonisjs/lucid/orm'
 import Property from './property.js'
 export default class PropertyLegalRequirement extends BaseModel {
   @column({ isPrimary: true })

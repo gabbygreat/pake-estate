@@ -4,6 +4,7 @@ import PropertyService, { DocumentationStages } from '#services/property_service
 import { sendError, sendSuccess } from '../utils.js'
 import PropertyMedia from '#models/property_media'
 import Property from '#models/property'
+import PropertyReview from '#models/property_review'
 export default class PropertiesController {
     constructor(
          protected uploadService:FileUploadService,
@@ -131,6 +132,23 @@ export default class PropertiesController {
            }
         } catch (error) {
             return sendError(response,{message:error.message,code:500})
+        }
+    }
+
+    public async submitReview({request,response,auth}:HttpContext){
+        try {
+            const user = auth.use('api').user
+            const { review, rating, property_id} = request.body()
+            const data:Partial<PropertyReview> = {
+                property:property_id,
+                rating,
+                review,
+                user_id:user?.id
+            }
+            await PropertyReview.updateOrCreate(data,data)
+            
+        } catch (error) {
+            
         }
     }
 }
