@@ -186,4 +186,22 @@ export default class PropertiesController {
             return sendError(response,{error:error,message:error.message})
         }
     }
+
+    public async topSellingProperties({request,response}:HttpContext){
+        try {
+            interface Filter{
+                page?: number
+                perPage?:number
+                start_date?:string
+                end_date?:string
+            }
+            const input:Filter = request.qs()
+            const properties = Property.query().select(['id','property_title','ask_price','general_rent_fee','total_purchases'])
+            .where('property_type','!=','')
+            const results = await properties.orderBy('total_purchases','desc').paginate(input.page ?? 1, input.perPage ?? 10)
+            return sendSuccess(response,{message:"Top Selling properties", data:results})
+        } catch (error) {
+            return sendError(response,{error:error,message:error.message})
+        }
+    }
 }

@@ -9,5 +9,7 @@ router.group(()=>{
     router.get('list-properties',[PropertyController,'listProperties'])
     router.get('info/:id',[PropertyController,'propertyInfo'])
     router.post('review',[PropertyController,'submitReview'])
+    router.get('review-summary',[PropertyController,'propertyReviewSummary'])
+    router.get('top-selling',[PropertyController,'topSellingProperties'])
 
 }).prefix('/property')
