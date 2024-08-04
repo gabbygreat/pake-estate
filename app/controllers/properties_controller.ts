@@ -72,6 +72,7 @@ export default class PropertiesController {
             interface Filter {
                 owner?:boolean //IF THIS IS OWNER,FETCH BOTH PUBLISHED AND UNPUBLISHED ELSE FETCH ONLY PUBLISHED
                 search?: string
+                forReview?:boolean,
                 sort?:'recent'|'oldest'
                 page?: number
                 perPage?:number
@@ -90,7 +91,9 @@ export default class PropertiesController {
             }
             
             !input.owner ? query.andWhere('current_state','=','published') : (()=>{})()
-
+            if(input.forReview){
+                query.orderBy('total_reviews', 'desc')
+            }
             if(input.sort){
                 query.orderBy('created_at', input.sort === 'oldest' ? 'asc' : 'desc')
             }
@@ -150,6 +153,35 @@ export default class PropertiesController {
             await PropertyReview.updateOrCreate(data,data)
             await this.propertyService.updateRatingandReview(property_id)
             return sendSuccess(response,{message:"Review submitted",})
+        } catch (error) {
+            return sendError(response,{error:error,message:error.message})
+        }
+    }
+
+    public async propertyReviewSummary({request,response}:HttpContext){
+        try {
+            const { page,perPage,property_id } = request.qs()
+            let property = await Property.find(property_id)
+            const ratings = [1,2,3,4,5]
+            const frequency = Array(ratings.length).fill(0)
+            for(let i=0; i < ratings.length; i++){
+                const total = await PropertyReview.query().count('id','total').whereRaw('property = ? AND rating = ?',[property_id,ratings[i]])
+                frequency[i] = total[0].$extras.total
+            }
+            const reviews = await PropertyReview.query()
+            .select('*')
+            .preload('userData',(user)=>{
+                user.select(['firstname','lastname'])
+            })
+            .where('property','=',property_id)
+            .orderBy('created_at','desc')
+            .paginate(page ?? 1,perPage ?? 1)
+
+            return sendSuccess(response,{message:"Review summary",data:{
+                property,
+                reviewSummary:{ratings,frequency},
+                reviews
+            }})
         } catch (error) {
             return sendError(response,{error:error,message:error.message})
         }
