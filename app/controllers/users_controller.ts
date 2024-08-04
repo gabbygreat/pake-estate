@@ -8,13 +8,16 @@ import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import { inject } from '@adonisjs/core'
 import LoginService from '#services/login_service'
+import EmailService ,{VerificationEmail,WelcomeEmail,ForgotPasswordEmail} from '#services/email_service'
+import env from '#start/env'
 
 @inject()
 export default class UsersController {
 
     constructor(
          protected otpService:OTPService,
-         protected loginService:LoginService
+         protected loginService:LoginService,
+         protected emailService:EmailService
     ){}
 
     async register({request,response}:HttpContext){
@@ -33,9 +36,15 @@ export default class UsersController {
                 const user = await User.create({firstname,lastname,email,password,phone_number},{client})
                 //Generate Email verification code
                 const verificationOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification'})
-                console.log(verificationOTP)
-                //TODO::Send this mail to the user's email address
-
+                await this.emailService.setTemplate<VerificationEmail>('email_verification',
+                    {
+                        firstname,
+                        verification_url:`${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${verificationOTP}`
+                    }).sendMail({
+                        subject:'Email Verification',
+                        to: email,
+                        from: 'Pake Estate Management'
+                    })
                 return sendSuccess(response,{message:'Account created successfuly',data:{...user.$attributes,password:'****'}})
             })
         } catch (error) {
@@ -60,8 +69,15 @@ export default class UsersController {
                 return sendSuccess(response,{message:'Please use the link already sent to your email'})
             }else{
                 const verificationOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification'})
-                console.log(verificationOTP)
-                //TODO::Send this mail to the user's email address
+                await this.emailService.setTemplate<VerificationEmail>('email_verification',
+                    {
+                        firstname:user.firstname!,
+                        verification_url:`${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${verificationOTP}`
+                    }).sendMail({
+                        subject:'Email Verification',
+                        to: email,
+                        from: 'Pake Estate Management'
+                    })
                 return sendSuccess(response,{message:'An email verification link has been sent to your email'})
             }
            }else{
@@ -101,8 +117,15 @@ export default class UsersController {
                         return sendSuccess(response,{message:'Please use the link already sent to your email'})
                     }else{
                         const verificationOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification'})
-                        console.log(verificationOTP)
-                        //TODO::Send this mail to the user's email address
+                        await this.emailService.setTemplate<VerificationEmail>('email_verification',
+                            {
+                                firstname:user.firstname!,
+                                verification_url:`${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${verificationOTP}`
+                            }).sendMail({
+                                subject:'Email Verification',
+                                to: email,
+                                from: 'Pake Estate Management'
+                            })
                         return sendSuccess(response,{message:'An email verification link has been sent to your email'})
                     } 
                 }
@@ -144,7 +167,14 @@ export default class UsersController {
                     user.email_verified = true
                     user.email_verified_at = new Date()
                     await user.save()
-                    
+                    await this.emailService.setTemplate<WelcomeEmail>('welcome_email',
+                        {
+                            firstname:user.firstname!,
+                        }).sendMail({
+                            subject:'Welcome Onboard',
+                            to: email,
+                            from: 'Pake Estate Management'
+                        })
                     return sendSuccess(response,{message:"Email Verification successful"})
                 }else{
                     return sendError(response,{message:'Invalid or expired token', code:400})
@@ -165,18 +195,40 @@ export default class UsersController {
             if(user){
                 if(!user.email_verified){
                     const prevOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification'})
-                    console.log(prevOTP)
-                    //TODO::SEND EMAIL
+                    await this.emailService.setTemplate<VerificationEmail>('email_verification',
+                        {
+                            firstname:user.firstname!,
+                            verification_url:`${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${prevOTP}`
+                        }).sendMail({
+                            subject:'Email Verification',
+                            to: email,
+                            from: 'Pake Estate Management'
+                        })
                     return sendSuccess(response,{message:'Please verify your email address before this action.'})
                 }else{
                     const prevOTP = await this.otpService.getRedisCode({user_id:user.id,code_type:'password_reset'})
                     if(prevOTP){
-                        //send the OTP
+                        await this.emailService.setTemplate<ForgotPasswordEmail>('forgot_password',
+                            {
+                                firstname:user.firstname!,
+                                otp_url:`${env.get('WEBSITE_URL')}/verification?type=forgot-password&email=${email}&token=${prevOTP}`
+                            }).sendMail({
+                                subject:'Forgot Password',
+                                to: email,
+                                from: 'Pake Estate Management'
+                            })
                       return sendSuccess(response,{message:'Password reset OTP already sent'})
                     }else{
                         const prevOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'password_reset'})
-                        //Send the OTP
-                        console.log(prevOTP)
+                        await this.emailService.setTemplate<ForgotPasswordEmail>('forgot_password',
+                            {
+                                firstname:user.firstname!,
+                                otp_url:`${env.get('WEBSITE_URL')}/verification?type=forgot-password&email=${email}&token=${prevOTP}`
+                            }).sendMail({
+                                subject:'Forgot Password',
+                                to: email,
+                                from: 'Pake Estate Management'
+                            })
                         return sendSuccess(response,{message:'Password reset OTP sent'})
                     }
                 }
