@@ -146,7 +146,8 @@ export default class PropertiesController {
                 user_id:user?.id
             }
             await PropertyReview.updateOrCreate(data,data)
-            
+            await this.propertyService.updateRatingandReview(property_id)
+            return sendSuccess(response,{message:"Review submitted",})
         } catch (error) {
             
         }
