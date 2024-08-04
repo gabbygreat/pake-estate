@@ -8,5 +8,6 @@ router.group(()=>{
     router.get('list-property-media',[PropertyController,'listPropertyMedia'])
     router.get('list-properties',[PropertyController,'listProperties'])
     router.get('info/:id',[PropertyController,'propertyInfo'])
+    router.post('review',[PropertyController,'submitReview'])
 
 }).prefix('/property')

@@ -34,7 +34,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   REDIS_PASSWORD: Env.schema.string.optional(),
 
   WEBSITE_URL: Env.schema.string(),
-
+  WEBSITE_API_URL: Env.schema.string(),
   /*
   |----------------------------------------------------------
   | Variables for configuring the mail package

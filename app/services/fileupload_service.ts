@@ -6,7 +6,7 @@ import { unlink } from 'fs/promises';
 export default class FileUploadService {
 
     private websiteuRL = process.env.NODE_ENV === 'production'
-  ? env.get("WEBSITE_URL")
+  ? env.get('WEBSITE_API_URL')
   : `http://localhost:${process.env.PORT}`;
 
    
