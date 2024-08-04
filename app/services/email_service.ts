@@ -4,6 +4,15 @@ type EmailTemplate = 'welcome_email'|'forgot_password'|'email_verification'
 export interface WelcomeEmail {
     firstname: string
 }
+export interface ForgotPasswordEmail {
+    firstname: string
+    otp_url: string
+}
+
+export interface VerificationEmail {
+    firstname: string
+    verification_url: string
+}
 export default class EmailService {
 
     private template: EmailTemplate = "email_verification"
