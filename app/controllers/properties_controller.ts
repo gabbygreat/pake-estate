@@ -187,17 +187,22 @@ export default class PropertiesController {
         }
     }
 
-    public async topSellingProperties({request,response}:HttpContext){
+    public async topSellingProperties({request,auth,response}:HttpContext){
         try {
             interface Filter{
                 page?: number
                 perPage?:number
                 start_date?:string
-                end_date?:string
+                end_date?:string,
+                for_user?:boolean
             }
             const input:Filter = request.qs()
             const properties = Property.query().select(['id','property_title','ask_price','general_rent_fee','total_purchases'])
             .where('property_type','!=','')
+            if(input.for_user){
+                const user = await auth.use('api').authenticate()
+                properties.where('owner_id','=',user?.id!)
+            }
             const results = await properties.orderBy('total_purchases','desc').paginate(input.page ?? 1, input.perPage ?? 10)
             return sendSuccess(response,{message:"Top Selling properties", data:results})
         } catch (error) {
