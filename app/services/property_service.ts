@@ -7,6 +7,7 @@ import PropertyUtility from "#models/property_utility";
 import PropertyFee from "#models/property_fee";
 import FileUploadService from "./fileupload_service.js";
 import PropertyMedia from "#models/property_media";
+import PropertyLegalRequirement from "#models/property_legal_requirement";
 
 export type DocumentationStages = 
 'PROPERTY_INFORMATION'|
@@ -137,6 +138,10 @@ export default class PropertyService{
             const additionalFees:Fee = request.input('additional_fees')
             const toAdd:Fee = []
             const toDelete:string[] = []
+            const { general_rent_fee, general_lease_time, general_renewal_cycle, security_deposit } = request.body()
+            if(!/annually|monthly|daily|weekly/.test(general_renewal_cycle)){
+                return sendError(response,{message:"Invalid billing cycle option",code:400})
+            }
             await db.transaction(async(client)=>{
                 const prevFees = await PropertyFee.query({client}).select(['id','name','amount']).where('property','=',id)
                 if(prevFees.length){
@@ -162,7 +167,7 @@ export default class PropertyService{
                 }
                 await PropertyFee.createMany(toAdd,{client}) //Now create the newly added additonal fees
                 await PropertyFee.query({client}).whereIn('id',toDelete).delete() //Now delete all fees removed from the client side
-                const { general_rent_fee, general_lease_time, general_renewal_cycle, security_deposit } = request.body()
+                
                 await Property.query({client}).update({
                     general_rent_fee, general_lease_time, general_renewal_cycle, security_deposit
                 }).where('id','=',id) //Now updated the property fee records
@@ -194,8 +199,25 @@ export default class PropertyService{
 
     }
 
-    async handlePropertyLegalInfo(){
+    async handlePropertyLegalInfo(request:Request,response:Response){
+        try {
+            const { tenant_screening_criteria, legal_disclosure, id } = request.body()
+            let data:Partial<PropertyLegalRequirement>
+            if(request.file('tenant_screening_criteria')){
+                const upload = await new FileUploadService().uploadFiles(request,'tenant_screening_criteria','legal-documents')
+                data = {property:id,name:'tenant_screening_criteria',description:tenant_screening_criteria,document_url:upload[0].name}
+                await PropertyLegalRequirement.updateOrCreate(data,data)
+            }
 
+            if(request.file('legal_disclosure')){
+                const upload = await new FileUploadService().uploadFiles(request,'legal_disclosure','legal-documents')
+                data = {property:id,name:'legal_disclosure',description:legal_disclosure,document_url:upload[0].name}
+                await PropertyLegalRequirement.updateOrCreate(data,data)
+            }
+            return sendSuccess(response,{message:"Legal records updated", code:200})
+        } catch (error) {
+            throw error
+        }
     }
 
     async updatePurchaseCount(){
