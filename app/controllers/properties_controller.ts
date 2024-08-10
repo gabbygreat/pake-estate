@@ -27,7 +27,7 @@ export default class PropertiesController {
                 case 'LEGAL_INFORMATION':
                     return this.propertyService.handlePropertyLegalInfo()
                 case 'MEDIA_INFORMATION':
-                    return this.propertyService.handlePropertyMediaUpload()
+                    return this.propertyService.handlePropertyMediaUpload(request,response)
                 case 'PROPERTY_INFORMATION':
                     return this.propertyService.handlePropertyInformation(request,response,user.id)
                 default:

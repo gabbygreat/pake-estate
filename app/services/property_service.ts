@@ -5,6 +5,8 @@ import PropertyAmenity from "#models/property_amenity";
 import db from "@adonisjs/lucid/services/db";
 import PropertyUtility from "#models/property_utility";
 import PropertyFee from "#models/property_fee";
+import FileUploadService from "./fileupload_service.js";
+import PropertyMedia from "#models/property_media";
 
 export type DocumentationStages = 
 'PROPERTY_INFORMATION'|
@@ -172,8 +174,20 @@ export default class PropertyService{
         }
     }
 
-    async handlePropertyMediaUpload(){
-
+    async handlePropertyMediaUpload(req:Request,res:Response){
+        try {
+            const id = req.input('id')
+            if(!req.files('media')){
+                return sendError(res,{message:"Invalid uploads", code:400})
+            }
+            const uploads = await new FileUploadService().uploadFiles(req,'media','properties')
+            const items:Array<Partial<PropertyMedia>> = []
+            uploads.forEach((e)=>items.push({property:id,media_url:e.name,media_type:e.fileType}))
+            await PropertyMedia.createMany(items)
+            return sendSuccess(res,{message:"Media items uploaded"}) 
+        } catch (error) {
+            throw error
+        }
     }
 
     async handlePropertyContact(){
