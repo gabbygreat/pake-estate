@@ -50,7 +50,7 @@ export default class Property extends BaseModel {
   declare property_title: string
 
   @column()
-  declare property_type: string
+  declare property_type: 'Apartment'|'Event Center'|'Store'
 
   @column()
   declare property_description: string
@@ -112,7 +112,7 @@ export default class Property extends BaseModel {
   declare general_lease_time: string
 
   @column()
-  declare general_renewal_cycle: string
+  declare general_renewal_cycle: 'yearly'|'monthly'|'daily'|'weekly'|'hourly'
 
   @column()
   declare security_deposit: number

@@ -56,6 +56,7 @@ export default class PropertyService{
             property.country = country
             property.longitude = longitude
             property.latitude = latitude
+            property.current_state = 'draft'
             property.owner_id = property.owner_id ?? owner
             await property.save()
             return sendSuccess(response,{message:"Property information updated",data:property})
@@ -139,7 +140,7 @@ export default class PropertyService{
             const toAdd:Fee = []
             const toDelete:string[] = []
             const { general_rent_fee, general_lease_time, general_renewal_cycle, security_deposit } = request.body()
-            if(!/annually|monthly|daily|weekly/.test(general_renewal_cycle)){
+            if(!/yearly|monthly|daily|weekly|hourly/.test(general_renewal_cycle)){
                 return sendError(response,{message:"Invalid billing cycle option",code:400})
             }
             await db.transaction(async(client)=>{
@@ -203,6 +204,7 @@ export default class PropertyService{
         try {
             const { tenant_screening_criteria, legal_disclosure, id } = request.body()
             let data:Partial<PropertyLegalRequirement>
+            
             if(request.file('tenant_screening_criteria')){
                 const upload = await new FileUploadService().uploadFiles(request,'tenant_screening_criteria','legal-documents')
                 data = {property:id,name:'tenant_screening_criteria',description:tenant_screening_criteria,document_url:upload[0].name}

@@ -6,6 +6,9 @@ import PropertyMedia from '#models/property_media'
 import Property from '#models/property'
 import PropertyReview from '#models/property_review'
 import { createReviewValidator } from '#validators/review'
+import { inject } from '@adonisjs/core'
+
+@inject()
 export default class PropertiesController {
     constructor(
          protected uploadService:FileUploadService,
@@ -144,6 +147,10 @@ export default class PropertiesController {
             const user = auth.use('api').user
             const { review, rating, property_id} = request.body()
             await request.validateUsing(createReviewValidator)
+            const isDraft = await Property.query().select(['current_state']).where('id','=',property_id)
+            if(isDraft[0] && isDraft[0].current_state === 'draft'){
+                return sendError(response,{message:"Property has not been published", code:400})
+            }
             const data:Partial<PropertyReview> = {
                 property:property_id,
                 rating,

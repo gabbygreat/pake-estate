@@ -1,14 +1,15 @@
 import router from "@adonisjs/core/services/router";
 import PropertyController from "#controllers/properties_controller";
+import { middleware } from "#start/kernel";
 
 router.group(()=>{
 
-    router.post('compose-property',[PropertyController,'composeProperty'])
-    router.delete('remove-property-media',[PropertyController,'removePropertyMedia'])
-    router.get('list-property-media',[PropertyController,'listPropertyMedia'])
+    router.post('compose-property',[PropertyController,'composeProperty']).use(middleware.auth({guards:['api']}))
+    router.delete('remove-property-media/:media_id',[PropertyController,'removePropertyMedia']).use(middleware.auth({guards:['api']}))
+    router.get('list-property-media/:property_id',[PropertyController,'listPropertyMedia'])
     router.get('list-properties',[PropertyController,'listProperties'])
     router.get('info/:id',[PropertyController,'propertyInfo'])
-    router.post('review',[PropertyController,'submitReview'])
+    router.post('review',[PropertyController,'submitReview']).use(middleware.auth({guards:['api']}))
     router.get('review-summary',[PropertyController,'propertyReviewSummary'])
     router.get('top-selling',[PropertyController,'topSellingProperties'])
 
