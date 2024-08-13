@@ -20,3 +20,8 @@ jobs:
           script: |
             cd /opt/commercial/products/PAKEESTATE/pake-estate-backend
             git pull origin staging --no-ff
+            node ace migration:run
+            node ace build
+            cp -R ./node_modules ../server/
+            cp -R ./build/* ../server/
+            pm2 reload estate-api-staging
