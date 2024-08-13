@@ -20,6 +20,8 @@ jobs:
           script: |
             cd /opt/commercial/products/PAKEESTATE/pake-estate-backend
             git pull origin staging --no-ff
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
             node ace migration:run
             node ace build
             cp -R ./node_modules ../server/
