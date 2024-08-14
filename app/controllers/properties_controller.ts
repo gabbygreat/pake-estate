@@ -216,4 +216,24 @@ export default class PropertiesController {
             return sendError(response,{error:error,message:error.message})
         }
     }
+
+    public async publishProperty({request,auth,response}:HttpContext){
+        try {
+            const user = auth.use('api').user
+            const { property_id } = request.body()
+            const property = await Property.find(property_id)
+            if(property && user){
+                if(property.owner_id != user.id){
+                    return sendError(response,{message:"You cannot publish this property", code:403})
+                }
+                property.current_state = 'published'
+                await property.save()
+                return sendSuccess(response,{message:"Property is live"})
+            }else{
+                return sendError(response,{message:"Property not found", code:404})
+            }
+        } catch (error) {
+            return sendError(response,{error:error,message:error.message})
+        }
+    }
 }
