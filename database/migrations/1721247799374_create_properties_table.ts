@@ -12,7 +12,7 @@ export default class extends BaseSchema {
       table.enu('current_state', ['draft', 'published']).notNullable()
       table.string('flagged').nullable()
       table.integer('total_reviews').defaultTo(0)
-      table.integer('total_rating').defaultTo(0)
+      table.decimal('total_rating',8,2).defaultTo(0)
       table.integer('total_views').defaultTo(0)
       table.integer('total_purchases').defaultTo(0)
       table.decimal('ask_price').defaultTo(0)
