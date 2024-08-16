@@ -38,3 +38,37 @@ export function sendError(
     });
   }
   
+  export function gisQuery(param: {
+    startLatitude: number
+    startLongitude: number
+    stopLatitude: number
+    stopLongitude: number
+  }) {
+    return `CAST(to_json(gps_cordinates::json)->>'latitude' as double precision) BETWEEN ${param.startLatitude} AND ${param.stopLatitude}
+          AND CAST(to_json(gps_cordinates::json)->>'longitude' as double precision) BETWEEN ${param.startLongitude} AND ${param.stopLongitude}`
+  }
+
+
+  export function calculateBoundingBox (latitude:number, longitude:number, distance:number) {
+    // Earth's radius in kilometers
+    const earthRadius = 6371
+  
+    // Convert distance from kilometers to degrees
+    const distanceInDegrees = distance / earthRadius
+  
+    // Calculate minimum and maximum latitudes
+    const minLat = latitude - distanceInDegrees
+    const maxLat = latitude + distanceInDegrees
+  
+    // Calculate minimum and maximum longitudes
+    const minLng = longitude - distanceInDegrees / Math.cos((latitude * Math.PI) / 180)
+    const maxLng = longitude + distanceInDegrees / Math.cos((latitude * Math.PI) / 180)
+  
+    // Return the bounding box
+    return {
+      minLat: minLat,
+      maxLat: maxLat,
+      minLng: minLng,
+      maxLng: maxLng,
+    }
+  }
