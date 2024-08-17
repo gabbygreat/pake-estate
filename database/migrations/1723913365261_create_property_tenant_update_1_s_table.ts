@@ -1,0 +1,46 @@
+import { BaseSchema } from '@adonisjs/lucid/schema'
+
+export default class extends BaseSchema {
+  protected tableName = 'property_tenants'
+
+  async up() {
+    this.schema.alterTable(this.tableName, (table) => {
+      table.uuid('property_id').references('id').inTable('properties').onDelete('CASCADE')
+      table.string('fullname').nullable()
+      table.string('email').nullable()
+      table.string('gender').nullable()
+      table.json('rental_history').nullable()
+      table.boolean('employed').defaultTo(false)
+      table.string('employee_name').nullable()
+      table.string('employment_type').nullable()
+      table.string('job_position').nullable()
+      table.string('job_salary').nullable()
+      table.string('company_name').nullable()
+      table.json('pet_names').nullable()
+      table.json('pet_types').nullable()
+      table.integer('total_pets').nullable()
+      table.json('pet_breeds').nullable()
+      table.timestamp('lease_start_date').nullable()
+      table.string('lease_term')
+      table.string('lease_payment')
+      table.decimal('offering_price').defaultTo(0)
+      table.decimal('discount_price').defaultTo(0)
+      table.string('status').nullable()
+      table.timestamp('payment_date').nullable()
+      table.uuid('payment_currency').references('id').inTable('client_currencies').onDelete('CASCADE')
+      table.timestamp('payment_next_due_date').nullable()
+      table.string('payment_status').defaultTo('unpaid')
+    })
+  }
+
+  async down() {
+    this.schema.alterTable(this.tableName,(table)=>{
+      table.dropColumns('property_id','fullname','email','lease_term',
+        'gender','rental_history','employed','employee_name','lease_payment',
+        'job_position','job_salary','company_name','pet_names','offering_price',
+        'pet_types','total_pets','pet_breeds','lease_start_date','discount_price',
+        'status','payment_date','payment_currency','payment_next_due_date','payment_status',
+      )
+    })
+  }
+}

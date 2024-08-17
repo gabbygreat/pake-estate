@@ -11,7 +11,6 @@ export default class extends BaseSchema {
       table.string('user_id').nullable()
       table.string('default_currency').nullable()
       table.boolean('supported').nullable()
-
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })

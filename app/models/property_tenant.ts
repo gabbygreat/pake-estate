@@ -5,6 +5,7 @@ import TenantDocument from './tenant_document.js'
 import type{ BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { hasMany } from '@adonisjs/lucid/orm'
 import Property from './property.js'
+import TenantPaymentHistory from './tenant_payment_history.js'
 
 export default class PropertyTenant extends BaseModel {
   @column({ isPrimary: true })
@@ -27,6 +28,9 @@ export default class PropertyTenant extends BaseModel {
 
   @column()
   declare employed: boolean
+
+  @column()
+  declare employment_type: 'self-employed'|''
 
   @column()
   declare employee_name: string
@@ -65,6 +69,9 @@ export default class PropertyTenant extends BaseModel {
   declare offering_price: number
 
   @column()
+  declare discount_price: number
+
+  @column()
   declare status: 'in-progress'|'rejected'|'approved'
 
   @column()
@@ -76,6 +83,9 @@ export default class PropertyTenant extends BaseModel {
   @column()
   declare payment_next_due_date: Date
 
+  @column()
+  declare payment_status: 'partially-paid'|'unpaid'|'fully-paid'
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -85,6 +95,10 @@ export default class PropertyTenant extends BaseModel {
   @hasMany(()=>TenantDocument,{foreignKey:'tenant_id', localKey:'id'})
   declare documents:HasMany<typeof TenantDocument>
 
-  @belongsTo(()=>Property,{foreignKey:'property_id', localKey:'id'})
+  @hasMany(()=>TenantPaymentHistory,{foreignKey:'tenant_id', localKey:'id'})
+  declare paymentHistories:HasMany<typeof TenantPaymentHistory>
+
+  @belongsTo(()=>Property,{foreignKey:'id', localKey:'property_id'})
   declare propertyInfo:BelongsTo<typeof Property>
+  
 }

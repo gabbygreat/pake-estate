@@ -11,7 +11,6 @@ import PropertyFee from './property_fee.js'
 import PropertyLegalRequirement from './property_legal_requirement.js'
 import PropertyMedia from './property_media.js'
 import PropertySection from './property_section.js'
-import PropertyTenancyRequest from './property_tenancy_request.js'
 import PropertyTenant from './property_tenant.js'
 import PropertyUtility from './property_utility.js'
 import PropertyReview from './property_review.js'
@@ -150,9 +149,6 @@ export default class Property extends BaseModel {
 
   @hasMany(()=>PropertySection,{foreignKey:'property', localKey:'id'})
   declare sections:HasMany<typeof PropertySection>
-
-  @hasMany(()=>PropertyTenancyRequest,{foreignKey:'property', localKey:'id'})
-  declare tenancyRequests:HasMany<typeof PropertyTenancyRequest>
 
   @hasMany(()=>PropertyTenant,{foreignKey:'property', localKey:'id'})
   declare tenants:HasMany<typeof PropertyTenant>
