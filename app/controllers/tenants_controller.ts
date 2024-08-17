@@ -87,4 +87,18 @@ export default class TenantsController {
             return sendError(response,{message:error.message,code:500})
         }
     }
+
+    public async tenantRequests({request,auth,response}:HttpContext){
+        try {
+            interface Filter {
+                user: 'tenant'|'owner',
+                property: string,
+                sort: 'recent'|'oldest',
+                status: 'in-progress'|'rejected'|'approved',
+                search: string
+            }
+        } catch (error) {
+            return sendError(response,{message:error.message,code:500})  
+        }
+    }
 }
