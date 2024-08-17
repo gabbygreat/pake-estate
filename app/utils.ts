@@ -44,8 +44,10 @@ export function sendError(
     stopLatitude: number
     stopLongitude: number
   }) {
-    return `CAST(to_json(gps_cordinates::json)->>'latitude' as double precision) BETWEEN ${param.startLatitude} AND ${param.stopLatitude}
-          AND CAST(to_json(gps_cordinates::json)->>'longitude' as double precision) BETWEEN ${param.startLongitude} AND ${param.stopLongitude}`
+    return `latitude BETWEEN ${param.startLatitude} AND ${param.stopLatitude}
+          AND longitude BETWEEN ${param.startLongitude} AND ${param.stopLongitude}`
+    // return `CAST(to_json(gps_cordinates::json)->>'latitude' as double precision) BETWEEN ${param.startLatitude} AND ${param.stopLatitude}
+    //       AND CAST(to_json(gps_cordinates::json)->>'longitude' as double precision) BETWEEN ${param.startLongitude} AND ${param.stopLongitude}`
   }
 
 
