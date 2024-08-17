@@ -15,6 +15,12 @@ export default class PropertyTenant extends BaseModel {
   declare property_id: string
 
   @column()
+  declare dob: string
+
+  @column()
+  declare mobile: string
+
+  @column()
   declare fullname: string
 
   @column()
@@ -82,6 +88,9 @@ export default class PropertyTenant extends BaseModel {
 
   @column()
   declare payment_next_due_date: Date
+
+  @column()
+  declare applicant_id: string
 
   @column()
   declare payment_status: 'partially-paid'|'unpaid'|'fully-paid'

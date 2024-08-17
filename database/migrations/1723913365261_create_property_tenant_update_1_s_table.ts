@@ -9,6 +9,8 @@ export default class extends BaseSchema {
       table.string('fullname').nullable()
       table.string('email').nullable()
       table.string('gender').nullable()
+      table.string('mobile').nullable()
+      table.string('dob').nullable()
       table.json('rental_history').nullable()
       table.boolean('employed').defaultTo(false)
       table.string('employee_name').nullable()
@@ -30,14 +32,15 @@ export default class extends BaseSchema {
       table.uuid('payment_currency').references('id').inTable('client_currencies').onDelete('CASCADE')
       table.timestamp('payment_next_due_date').nullable()
       table.string('payment_status').defaultTo('unpaid')
+      table.uuid('applicant_id').references('id').inTable('users').onDelete('CASCADE')
     })
   }
 
   async down() {
     this.schema.alterTable(this.tableName,(table)=>{
-      table.dropColumns('property_id','fullname','email','lease_term',
-        'gender','rental_history','employed','employee_name','lease_payment',
-        'job_position','job_salary','company_name','pet_names','offering_price',
+      table.dropColumns('property_id','fullname','email','lease_term','dob','mobile',
+        'gender','rental_history','employed','employee_name','lease_payment','employment_type',
+        'job_position','job_salary','company_name','pet_names','offering_price','applicant_id',
         'pet_types','total_pets','pet_breeds','lease_start_date','discount_price',
         'status','payment_date','payment_currency','payment_next_due_date','payment_status',
       )
