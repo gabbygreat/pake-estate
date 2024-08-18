@@ -17,8 +17,19 @@ export function sendError(
       error: Error;
     }>
   ) {
-    return response.status(data.code || 500).json({
-      message: data.message || data.error?.message,
+    let message = data.message || data.error?.message
+    let status = data.code || 500
+    //@ts-ignore
+    if(data.error?.messages){
+      //@ts-ignore
+      if(data.error?.messages.length){
+        status = 422
+        //@ts-ignore
+        message = data.error?.messages[0].message
+      }
+    }
+    return response.status(status).json({
+      message: message
     });
   }
   
@@ -38,3 +49,48 @@ export function sendError(
     });
   }
   
+  export function gisQuery(param: {
+    startLatitude: number
+    startLongitude: number
+    stopLatitude: number
+    stopLongitude: number
+  }) {
+    return `latitude BETWEEN ${param.startLatitude} AND ${param.stopLatitude}
+          AND longitude BETWEEN ${param.startLongitude} AND ${param.stopLongitude}`
+    // return `CAST(to_json(gps_cordinates::json)->>'latitude' as double precision) BETWEEN ${param.startLatitude} AND ${param.stopLatitude}
+    //       AND CAST(to_json(gps_cordinates::json)->>'longitude' as double precision) BETWEEN ${param.startLongitude} AND ${param.stopLongitude}`
+  }
+
+
+  export function calculateBoundingBox (latitude:number, longitude:number, distance:number) {
+    // Earth's radius in kilometers
+    const earthRadius = 6371
+  
+    // Convert distance from kilometers to degrees
+    const distanceInDegrees = distance / earthRadius
+  
+    // Calculate minimum and maximum latitudes
+    const minLat = latitude - distanceInDegrees
+    const maxLat = latitude + distanceInDegrees
+  
+    // Calculate minimum and maximum longitudes
+    const minLng = longitude - distanceInDegrees / Math.cos((latitude * Math.PI) / 180)
+    const maxLng = longitude + distanceInDegrees / Math.cos((latitude * Math.PI) / 180)
+  
+    // Return the bounding box
+    return {
+      minLat: minLat,
+      maxLat: maxLat,
+      minLng: minLng,
+      maxLng: maxLng,
+    }
+  }
+
+  export async function ValidateHandler(handler:()=>void,response:Response){
+    try {
+      handler()
+    } catch (error) {
+      console.log("HERE IS THE ERROR")
+      return sendError(response,{message:''})
+    }
+  }

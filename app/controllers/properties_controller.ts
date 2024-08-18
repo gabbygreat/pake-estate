@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import FileUploadService from '#services/fileupload_service'
 import PropertyService, { DocumentationStages } from '#services/property_service'
-import { sendError, sendSuccess } from '../utils.js'
+import { calculateBoundingBox, gisQuery, sendError, sendSuccess } from '../utils.js'
 import PropertyMedia from '#models/property_media'
 import Property from '#models/property'
 import PropertyReview from '#models/property_review'
@@ -78,7 +78,9 @@ export default class PropertiesController {
                 forReview?:boolean,
                 sort?:'recent'|'oldest'
                 page?: number
-                perPage?:number
+                perPage?:number,
+                latitude?:number,
+                longitude?:number
             }
             const input:Filter = request.qs()
             const query = Property.query()
@@ -99,6 +101,17 @@ export default class PropertiesController {
             }
             if(input.sort){
                 query.orderBy('created_at', input.sort === 'oldest' ? 'asc' : 'desc')
+            }
+
+            if(input.latitude && input.longitude){
+                const {maxLat,maxLng,minLat,minLng} = calculateBoundingBox(input.latitude,input.longitude,5)//5KM AREA
+                const locationQuery = gisQuery({
+                    startLatitude:minLat,
+                    startLongitude:minLng,
+                    stopLatitude:maxLat,
+                    stopLongitude:maxLng
+                })
+                query.andWhere((q)=>{q.whereRaw(locationQuery)})
             }
             const data = await query.paginate(input.page ?? 1, input.perPage ?? 20)
             return sendSuccess(response,{message:"Property listing", data})
@@ -231,6 +244,26 @@ export default class PropertiesController {
                 return sendSuccess(response,{message:"Property is live"})
             }else{
                 return sendError(response,{message:"Property not found", code:404})
+            }
+        } catch (error) {
+            return sendError(response,{error:error,message:error.message})
+        }
+    }
+    
+    public async hideProperty({request,auth,response}:HttpContext){
+        try {
+            const { id } = request.params()
+            const owner_id = auth.use('api').user?.id
+            const property = await Property.find(id)
+            if(property){
+                if(property.owner_id !== owner_id){
+                    return sendError(response,{message:"You cannot perform this operation", code:403}) 
+                }
+                property.current_state = 'draft'
+                await property.save()
+                return sendSuccess(response,{message:'Property status updated'})
+            }else{
+                return sendError(response,{message:'Property not found', code:404})
             }
         } catch (error) {
             return sendError(response,{error:error,message:error.message})

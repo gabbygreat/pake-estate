@@ -23,6 +23,7 @@ jobs:
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             node ace build
+            node ace migration:run
             cp -R ./node_modules ../server/
             cp -R ./build/* ../server/
             pm2 reload estate-api-staging

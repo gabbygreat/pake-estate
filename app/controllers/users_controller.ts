@@ -277,4 +277,5 @@ export default class UsersController {
     async profile({}:HttpContext){
 
     }
+
 }
