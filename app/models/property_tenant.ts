@@ -1,11 +1,12 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo, column, hasOne } from '@adonisjs/lucid/orm'
 import type { RentalHistory } from '../types.js'
 import TenantDocument from './tenant_document.js'
-import type{ BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import type{ BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import { hasMany } from '@adonisjs/lucid/orm'
 import Property from './property.js'
 import TenantPaymentHistory from './tenant_payment_history.js'
+import User from './user.js'
 
 export default class PropertyTenant extends BaseModel {
   @column({ isPrimary: true })
@@ -13,6 +14,9 @@ export default class PropertyTenant extends BaseModel {
 
   @column()
   declare property_id: string
+
+  @column()
+  declare property_owner_id: string
 
   @column()
   declare dob: string
@@ -78,7 +82,10 @@ export default class PropertyTenant extends BaseModel {
   declare discount_price: number
 
   @column()
-  declare status: 'in-progress'|'rejected'|'approved'
+  declare status: 'in-progress'|'rejected'|'approved'|'cancelled'
+
+  @column()
+  declare approval_date: Date
 
   @column()
   declare payment_date: Date
@@ -109,5 +116,11 @@ export default class PropertyTenant extends BaseModel {
 
   @belongsTo(()=>Property,{foreignKey:'id', localKey:'property_id'})
   declare propertyInfo:BelongsTo<typeof Property>
+
+  @hasOne(()=>User,{foreignKey:'id', localKey:'applicant_id'})
+  declare applicantInfo:HasOne<typeof User>
+
+  @hasOne(()=>User,{foreignKey:'id', localKey:'property_owner_id'})
+  declare ownerInfo:HasOne<typeof User>
   
 }

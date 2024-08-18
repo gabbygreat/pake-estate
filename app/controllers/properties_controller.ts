@@ -249,4 +249,24 @@ export default class PropertiesController {
             return sendError(response,{error:error,message:error.message})
         }
     }
+    
+    public async hideProperty({request,auth,response}:HttpContext){
+        try {
+            const { id } = request.params()
+            const owner_id = auth.use('api').user?.id
+            const property = await Property.find(id)
+            if(property){
+                if(property.owner_id !== owner_id){
+                    return sendError(response,{message:"You cannot perform this operation", code:403}) 
+                }
+                property.current_state = 'draft'
+                await property.save()
+                return sendSuccess(response,{message:'Property status updated'})
+            }else{
+                return sendError(response,{message:'Property not found', code:404})
+            }
+        } catch (error) {
+            return sendError(response,{error:error,message:error.message})
+        }
+    }
 }
