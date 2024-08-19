@@ -47,6 +47,7 @@ export default class LoginService {
             user.password = ' '
             user.firstname = googleUser.given_name
             user.lastname = googleUser.family_name
+            user.profile_picture = googleUser.picture
             //user.username = `${(googleUser.given_name as string).toLocaleLowerCase()}${googleUser.sub.slice(0, 4)}`
             user.email = googleUser.email
             await user.save()
