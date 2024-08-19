@@ -130,7 +130,7 @@ export default class UsersController {
                     } 
                 }
                 const token = await User.accessTokens.create(user)
-                return sendSuccess(response,{message:"Login Success", data:token})
+                return sendSuccess(response,{message:"Login Success", data:{token,user}})
             }else{
                 return sendError(response,{message:'Authentication error', code:401})
             }

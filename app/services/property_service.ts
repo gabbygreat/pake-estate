@@ -33,7 +33,8 @@ export default class PropertyService{
                 street_name,
                 city,postal_code,
                 state,country,longitude,
-                latitude
+                latitude,
+                property_description
             } = request.body()
             let property:Property
             if(id){
@@ -57,6 +58,7 @@ export default class PropertyService{
             property.longitude = longitude
             property.latitude = latitude
             property.current_state = 'draft'
+            property.property_description = property_description
             property.owner_id = property.owner_id ?? owner
             await property.save()
             return sendSuccess(response,{message:"Property information updated",data:property})

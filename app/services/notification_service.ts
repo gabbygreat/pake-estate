@@ -4,7 +4,7 @@ export default class NotificationService {
         return {
             "RENTAL_APPLICATION_SUBMISSION": ()=>{
                 return { 
-                    title:`Rental Application Request`, 
+                    title:``, 
                     message:``
                 }
             },

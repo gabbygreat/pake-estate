@@ -27,6 +27,11 @@ export default class LoginService {
         if (googleUser.email_verified) {
           const user = await User.findBy('email', googleUser.email)
           if (user) {
+            if(!user.firstname || !user.lastname){
+              user.firstname = googleUser.given_name
+              user.lastname = googleUser.family_name
+              await user.save()
+            }
             const token = await User.accessTokens.create(user,[],{expiresIn: '100 days'})//generate(user, { expiresIn: '100 days' })
             return {
               error: false,
@@ -40,6 +45,8 @@ export default class LoginService {
             const user = new User()
             user.register_source = 'gmail'
             user.password = ' '
+            user.firstname = googleUser.given_name
+            user.lastname = googleUser.family_name
             //user.username = `${(googleUser.given_name as string).toLocaleLowerCase()}${googleUser.sub.slice(0, 4)}`
             user.email = googleUser.email
             await user.save()
