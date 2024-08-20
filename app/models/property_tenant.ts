@@ -7,6 +7,7 @@ import { hasMany } from '@adonisjs/lucid/orm'
 import Property from './property.js'
 import TenantPaymentHistory from './tenant_payment_history.js'
 import User from './user.js'
+import TenantApplicableFee from './tenant_applicable_fee.js'
 
 export default class PropertyTenant extends BaseModel {
   @column({ isPrimary: true })
@@ -85,6 +86,9 @@ export default class PropertyTenant extends BaseModel {
   declare status: 'in-progress'|'rejected'|'approved'|'cancelled'
 
   @column()
+  declare rejection_reason: string
+
+  @column()
   declare approval_date: Date
 
   @column()
@@ -122,5 +126,8 @@ export default class PropertyTenant extends BaseModel {
 
   @hasOne(()=>User,{foreignKey:'id', localKey:'property_owner_id'})
   declare ownerInfo:HasOne<typeof User>
+
+  @hasMany(()=>TenantApplicableFee,{foreignKey:'tenant_id', localKey:'id'})
+  declare applicableFees:HasMany<typeof TenantApplicableFee>
   
 }

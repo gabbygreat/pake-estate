@@ -7,6 +7,8 @@ import { sendError, sendSuccess } from '../utils.js'
 import PropertyTenant from '#models/property_tenant'
 import Property from '#models/property'
 import db from '@adonisjs/lucid/services/db'
+import PropertyFee from '#models/property_fee'
+import TenantApplicableFee from '#models/tenant_applicable_fee'
 
 @inject()
 export default class TenantsController {
@@ -97,6 +99,18 @@ export default class TenantsController {
                 e.tenant_id = data.id
             })
             await TenantDocument.createMany(docs,{client})
+
+            //Apply the fees
+            const propertyFees = await PropertyFee.query({client}).select(['id']).where('property','=',property_id)
+            const tenantApplicableFees:Array<Partial<TenantApplicableFee>> = []
+            propertyFees.forEach((fee)=>{
+                tenantApplicableFees.push({
+                    property_id:property_id,
+                    tenant_id: data.id,
+                    fee_id: fee.id
+                })
+            })
+            await TenantApplicableFee.createMany(tenantApplicableFees,{client})
             //TODO:: PROPERTY OWNER NOTIFICATION
             return sendSuccess(response,{message:"Application Submitted", code:200})
         })
@@ -160,6 +174,7 @@ export default class TenantsController {
     public async updateApplicationStatus({request,response,auth}:HttpContext){
         try {
             const { tenant_id, status } = request.params()
+            const { reason } = request.body()
             if(!/^rejected|approved/.test(status)){
                 return sendError(response,{message:'Invalid status option', code:400})
             }
@@ -170,9 +185,12 @@ export default class TenantsController {
                 }
                 record.status = status
                 //TODO:: APPLICANT NOTIFICATION
-                if(record.status === 'approved'){
+                if(status === 'approved'){
                     record.approval_date = new Date()
                     //Generate RENTAL INVOICE FOR THE USER
+                }
+                if(status === 'rejected'){
+                    record.rejection_reason = reason
                 }
                 await record.save()
                 return sendSuccess(response,{message:'Application status updated successfully', code:200})
@@ -192,6 +210,12 @@ export default class TenantsController {
             .preload('propertyInfo',(property)=>property.select(['id','property_title']))
             .preload('applicantInfo',(applicant)=>applicant.select(['id','firstname','lastname','email']))
             .preload('documents',(documents)=>documents.select('*'))
+            .preload('applicableFees',(fees)=>{
+                fees.select(['id','fee_id','fee_discount'])
+                .preload('feeInfo',(feeInfo)=>{
+                    feeInfo.select(['name','amount'])
+                })
+            })
             .where('id','=',tenant_id)
             if(!result[0]){
                 return sendError(response,{message:"Property Tenant not found",code:404}) 
