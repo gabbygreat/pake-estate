@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { createTenantValidator } from '#validators/tenant_application'
 import FileUploadService from '#services/fileupload_service'
+import NotificationService from '#services/notification_service'
 import { inject } from '@adonisjs/core'
 import TenantDocument from '#models/tenant_document'
 import { sendError, sendSuccess } from '../utils.js'
@@ -9,11 +10,12 @@ import Property from '#models/property'
 import db from '@adonisjs/lucid/services/db'
 import PropertyFee from '#models/property_fee'
 import TenantApplicableFee from '#models/tenant_applicable_fee'
+import Notification from '#models/notification'
 
 @inject()
 export default class TenantsController {
 
-    constructor(protected uploadService:FileUploadService){}
+    constructor(protected uploadService:FileUploadService,protected notificationService:NotificationService){}
     public async sendApplication({request,auth,response}:HttpContext){
         const docs:Array<Partial<TenantDocument>> = []
         try {
@@ -66,7 +68,7 @@ export default class TenantsController {
             
             await db.transaction(async(client)=>{
 
-            const owner = await Property.query({client}).select(['owner_id']).where('id','=',property_id)
+            const owner = await Property.query({client}).select(['owner_id','property_title']).where('id','=',property_id)
 
             const data = await PropertyTenant.create({
                 property_id,
@@ -112,6 +114,18 @@ export default class TenantsController {
             })
             await TenantApplicableFee.createMany(tenantApplicableFees,{client})
             //TODO:: PROPERTY OWNER NOTIFICATION
+            const notificationTemplate = this.notificationService.message()['RENTAL_APPLICATION_SUBMISSION']({
+                property_name: owner[0].property_title
+            })
+            await Notification.create({
+                user_id: owner[0].owner_id,
+                title: notificationTemplate.title,
+                message: notificationTemplate.message,
+                type: notificationTemplate.type,
+                actor_refs: [data.applicant_id],
+                entity_ids: JSON.stringify({'property_id':property_id}),
+                slug: 'RENTAL_APPLICATION_SUBMISSION'
+            })
             return sendSuccess(response,{message:"Application Submitted", code:200})
         })
         } catch (error) {
@@ -175,17 +189,30 @@ export default class TenantsController {
         try {
             const { tenant_id, status } = request.params()
             const { reason } = request.body()
+            const currentUser = auth.use('api').user?.id
             if(!/^rejected|approved/.test(status)){
                 return sendError(response,{message:'Invalid status option', code:400})
             }
             const record = await PropertyTenant.find(tenant_id)
             if(record){
-                if(auth.use('api').user?.id !== record.property_owner_id){
+                if(currentUser !== record.property_owner_id){
                     return sendError(response,{message:'You cannot process this application', code:403})
                 }
                 record.status = status
-                //TODO:: APPLICANT NOTIFICATION
+                const property = await Property.query().select(['property_title']).where('id','=',record.property_id)
                 if(status === 'approved'){
+                    const notificationTemplate = this.notificationService.message()['RENTAL_APPLICATION_ACCEPTANCE']({
+                        property_name: property[0].property_title
+                    })
+                    await Notification.create({
+                        user_id: record.applicant_id,
+                        title: notificationTemplate.title,
+                        message: notificationTemplate.message,
+                        type: notificationTemplate.type,
+                        actor_refs: [currentUser],
+                        entity_ids: JSON.stringify({'property_id':record.property_id,'tenancy_application_id':record.id}),
+                        slug: 'RENTAL_APPLICATION_ACCEPTANCE'
+                    })
                     record.approval_date = new Date()
                     //Generate RENTAL INVOICE FOR THE USER
                 }

@@ -26,6 +26,12 @@ export default class Notification extends BaseModel {
   @column()
   declare actor_refs: string[]
 
+  @column()
+  declare type: string
+
+  @column()
+  declare entity_ids: string
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

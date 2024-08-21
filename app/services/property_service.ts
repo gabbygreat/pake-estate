@@ -207,14 +207,14 @@ export default class PropertyService{
             const { tenant_screening_criteria, legal_disclosure, id } = request.body()
             let data:Partial<PropertyLegalRequirement>
             
-            if(request.file('tenant_screening_criteria')){
-                const upload = await new FileUploadService().uploadFiles(request,'tenant_screening_criteria','legal-documents')
+            if(request.file('tenant_screening_criteria_doc')){
+                const upload = await new FileUploadService().uploadFiles(request,'tenant_screening_criteria_doc','legal-documents')
                 data = {property:id,name:'tenant_screening_criteria',description:tenant_screening_criteria,document_url:upload[0].name}
                 await PropertyLegalRequirement.updateOrCreate({property:id,name:'tenant_screening_criteria'},data)
             }
 
-            if(request.file('legal_disclosure')){
-                const upload = await new FileUploadService().uploadFiles(request,'legal_disclosure','legal-documents')
+            if(request.file('legal_disclosure_doc')){
+                const upload = await new FileUploadService().uploadFiles(request,'legal_disclosure_doc','legal-documents')
                 data = {property:id,name:'legal_disclosure',description:legal_disclosure,document_url:upload[0].name}
                 await PropertyLegalRequirement.updateOrCreate({property:id,name:'legal_disclosure'},data)
             }
