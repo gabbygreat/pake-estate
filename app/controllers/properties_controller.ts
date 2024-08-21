@@ -146,7 +146,7 @@ export default class PropertiesController {
                 media.select(['id',"media_url","media_type"])
             }).where('id','=',id)
            if(data){
-            return sendSuccess(response,{data,message:"Property information"})
+            return sendSuccess(response,{data:data[0],message:"Property information"})
            }else{
             return sendError(response,{message:"Property not found",code:404})
            }
