@@ -70,7 +70,7 @@ export default class PropertiesController {
     }
 
 
-    async listProperties({request,response}:HttpContext){
+    async listProperties({request,auth,response}:HttpContext){
         try {
             interface Filter {
                 owner?:boolean //IF THIS IS OWNER,FETCH BOTH PUBLISHED AND UNPUBLISHED ELSE FETCH ONLY PUBLISHED
@@ -96,6 +96,12 @@ export default class PropertiesController {
             }
             
             !input.owner ? query.andWhere('current_state','=','published') : (()=>{})()
+            
+            if(input.owner){
+                const user = await auth.authenticate()
+                query.andWhere('owner_id','=',user.id)
+            }
+
             if(input.forReview){
                 query.orderBy('total_reviews', 'desc')
             }
