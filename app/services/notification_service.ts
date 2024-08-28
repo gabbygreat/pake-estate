@@ -1,3 +1,4 @@
+import Notification from "#models/notification"
 
 export default class NotificationService {
     message() {
@@ -44,5 +45,10 @@ export default class NotificationService {
                 }
             }
         }
+    }
+
+    async unreadNotification(user:string){
+        const total = await Notification.query().count('id','total').whereRaw('user_id = ? AND read = ?',[user,false])
+        return total[0].$extras.total
     }
 }

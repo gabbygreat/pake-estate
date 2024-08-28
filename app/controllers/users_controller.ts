@@ -8,8 +8,10 @@ import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import { inject } from '@adonisjs/core'
 import LoginService from '#services/login_service'
+import NotificationService from '#services/notification_service'
 import EmailService ,{VerificationEmail,WelcomeEmail,ForgotPasswordEmail} from '#services/email_service'
 import env from '#start/env'
+import Notification from '#models/notification'
 
 @inject()
 export default class UsersController {
@@ -17,7 +19,8 @@ export default class UsersController {
     constructor(
          protected otpService:OTPService,
          protected loginService:LoginService,
-         protected emailService:EmailService
+         protected emailService:EmailService,
+         protected noticeService:NotificationService
     ){}
 
     async register({request,response}:HttpContext){
@@ -130,7 +133,13 @@ export default class UsersController {
                     } 
                 }
                 const token = await User.accessTokens.create(user)
-                return sendSuccess(response,{message:"Login Success", data:{token,user}})
+                return sendSuccess(response,{
+                    message:"Login Success", 
+                    data:{
+                        token,
+                        user,
+                        unreadNotice: await this.noticeService.unreadNotification(user.id)
+                    }})
             }else{
                 return sendError(response,{message:'Authentication error', code:401})
             }
@@ -274,8 +283,15 @@ export default class UsersController {
         }
     }
 
-    async profile({}:HttpContext){
-
+    async notifications({auth,response}:HttpContext){
+        try {
+            const user = auth.use('api').user!
+            const data = await Notification.query().select('*').where('user_id','=',user.id)
+            await Notification.query().where('user_id','=',user.id).update({read:true})
+            return sendSuccess(response,{message:'Notifications',data})
+        } catch (error) {
+            return sendError(response,{message: error.message})
+        }
     }
 
 }

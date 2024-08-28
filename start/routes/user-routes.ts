@@ -22,4 +22,6 @@ router.group(()=>{
 
     router.get('resend-verification-token/:email',[UsersController,'resendEmailVerificationCode'])
 
+    router.get('notifications',[UsersController,'notifications']).use(middleware.auth({guards:['api']}))
+
 }).prefix('/user')

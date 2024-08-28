@@ -122,10 +122,10 @@ export default class TenantsController {
                 title: notificationTemplate.title,
                 message: notificationTemplate.message,
                 type: notificationTemplate.type,
-                actor_refs: [data.applicant_id],
+                actor_refs: JSON.stringify([data.applicant_id]),
                 entity_ids: JSON.stringify({'property_id':property_id}),
                 slug: 'RENTAL_APPLICATION_SUBMISSION'
-            })
+            },{client})
             return sendSuccess(response,{message:"Application Submitted", code:200})
         })
         } catch (error) {
@@ -209,7 +209,7 @@ export default class TenantsController {
                         title: notificationTemplate.title,
                         message: notificationTemplate.message,
                         type: notificationTemplate.type,
-                        actor_refs: [currentUser],
+                        actor_refs: JSON.stringify([currentUser]),
                         entity_ids: JSON.stringify({'property_id':record.property_id,'tenancy_application_id':record.id}),
                         slug: 'RENTAL_APPLICATION_ACCEPTANCE'
                     })

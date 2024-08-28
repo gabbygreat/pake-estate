@@ -24,7 +24,7 @@ export default class Notification extends BaseModel {
   declare destination_url: string
 
   @column()
-  declare actor_refs: string[]
+  declare actor_refs: string
 
   @column()
   declare type: string

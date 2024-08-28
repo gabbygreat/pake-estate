@@ -1,5 +1,6 @@
 import User from "#models/user"
 import axios from "axios"
+import NotificationService from "./notification_service.js"
 // import type { Authenticator } from '@adonisjs/auth'
 // import { Authenticators } from "@adonisjs/auth/types"
 
@@ -39,6 +40,7 @@ export default class LoginService {
               data: {
                 token: token,
                 user: user,
+                unreadNotice: await new NotificationService().unreadNotification(user.id)
               },
             }
           } else {
@@ -58,6 +60,7 @@ export default class LoginService {
               data: {
                 token: token,
                 user: user,
+                unreadNotice: await new NotificationService().unreadNotification(user.id)
               },
             }
           }
