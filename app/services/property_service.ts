@@ -206,9 +206,10 @@ export default class PropertyService{
         try {
             const { tenant_screening_criteria, legal_disclosure, id } = request.body()
             let upload1 = ''
-            if(request.file('tenant_screening_criteria_doc')){
+            if(request.files('tenant_screening_criteria_doc')){
                 const upload = await new FileUploadService().uploadFiles(request,'tenant_screening_criteria_doc','legal-documents')
-                upload1 = upload[0].name!
+                upload1 = upload[0].name
+                console.log(upload1)
             }
     
             const existing = await PropertyLegalRequirement.query().select('*').where('property','=',id).andWhere('name','=','tenant_screening_criteria')
@@ -227,7 +228,7 @@ export default class PropertyService{
                     })
                 }
             let upload2 = ''
-            if(request.file('legal_disclosure_doc')){
+            if(request.files('legal_disclosure_doc')){
                 const upload = await new FileUploadService().uploadFiles(request,'legal_disclosure_doc','legal-documents')
                 upload2 = upload[0].name
             }
