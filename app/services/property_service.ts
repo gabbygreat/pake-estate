@@ -205,39 +205,47 @@ export default class PropertyService{
     async handlePropertyLegalInfo(request:Request,response:Response){
         try {
             const { tenant_screening_criteria, legal_disclosure, id } = request.body()
-            console.log(tenant_screening_criteria)
-            console.log(legal_disclosure)
-            console.log(id)
-            let data:Partial<PropertyLegalRequirement>
-    
+            let upload1 = ''
             if(request.file('tenant_screening_criteria_doc')){
                 const upload = await new FileUploadService().uploadFiles(request,'tenant_screening_criteria_doc','legal-documents')
-                data = {property:id,name:'tenant_screening_criteria',description:tenant_screening_criteria,document_url:upload[0].name}
-                const existing = await PropertyLegalRequirement.query().select('*').where('property','=',id).andWhere('name','=','tenant_screening_criteria')
+                upload1 = upload[0].name!
+            }
+    
+            const existing = await PropertyLegalRequirement.query().select('*').where('property','=',id).andWhere('name','=','tenant_screening_criteria')
                 if(existing[0]){
-                    existing[0].property = data.id!
-                    existing[0].name = data.name!
-                    existing[0].document_url = upload[0].name ?? existing[0].document_url
+                    existing[0].property = id
+                    existing[0].name = 'tenant_screening_criteria'
+                    existing[0].description = tenant_screening_criteria
+                    existing[0].document_url = upload1 ?? existing[0].document_url
                     await existing[0].save()
                 }else{
-                    await PropertyLegalRequirement.create(data)
+                    await PropertyLegalRequirement.create({
+                        property:id,
+                        name:'tenant_screening_criteria',
+                        description:tenant_screening_criteria,
+                        document_url:upload1
+                    })
                 }
-                
-            }
-
+            let upload2 = ''
             if(request.file('legal_disclosure_doc')){
                 const upload = await new FileUploadService().uploadFiles(request,'legal_disclosure_doc','legal-documents')
-                data = {property:id,name:'legal_disclosure',description:legal_disclosure,document_url:upload[0].name}
-                const existing = await PropertyLegalRequirement.query().select('*').where('property','=',id).andWhere('name','=','legal_disclosure')
-                if(existing[0]){
-                    existing[0].property = data.id!
-                    existing[0].name = data.name!
-                    existing[0].document_url = upload[0].name ?? existing[0].document_url
-                    await existing[0].save()
-                }else{
-                    await PropertyLegalRequirement.create(data)
-                }
+                upload2 = upload[0].name
             }
+            const existing2 = await PropertyLegalRequirement.query().select('*').where('property','=',id).andWhere('name','=','legal_disclosure')
+                if(existing2[0]){
+                    existing2[0].property = id
+                    existing2[0].name = 'legal_disclosure'
+                    existing[0].description = legal_disclosure
+                    existing2[0].document_url = upload2 ?? existing2[0].document_url
+                    await existing2[0].save()
+                }else{
+                    await PropertyLegalRequirement.create({
+                        name: 'legal_disclosure',
+                        description: legal_disclosure,
+                        document_url: upload2,
+                        property: id
+                    })
+                }
             return sendSuccess(response,{message:"Legal records updated", code:200})
         } catch (error) {
             throw error
