@@ -236,7 +236,7 @@ export default class PropertyService{
                 if(existing2[0]){
                     existing2[0].property = id
                     existing2[0].name = 'legal_disclosure'
-                    existing[0].description = legal_disclosure
+                    existing2[0].description = legal_disclosure
                     existing2[0].document_url = upload2 ?? existing2[0].document_url
                     await existing2[0].save()
                 }else{
