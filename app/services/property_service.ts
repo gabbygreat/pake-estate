@@ -205,6 +205,9 @@ export default class PropertyService{
     async handlePropertyLegalInfo(request:Request,response:Response){
         try {
             const { tenant_screening_criteria, legal_disclosure, id } = request.body()
+            console.log(tenant_screening_criteria)
+            console.log(legal_disclosure)
+            console.log(id)
             let data:Partial<PropertyLegalRequirement>
     
             if(request.file('tenant_screening_criteria_doc')){
