@@ -206,17 +206,34 @@ export default class PropertyService{
         try {
             const { tenant_screening_criteria, legal_disclosure, id } = request.body()
             let data:Partial<PropertyLegalRequirement>
-            
+    
             if(request.file('tenant_screening_criteria_doc')){
                 const upload = await new FileUploadService().uploadFiles(request,'tenant_screening_criteria_doc','legal-documents')
                 data = {property:id,name:'tenant_screening_criteria',description:tenant_screening_criteria,document_url:upload[0].name}
-                await PropertyLegalRequirement.updateOrCreate({property:id,name:'tenant_screening_criteria'},data)
+                const existing = await PropertyLegalRequirement.query().select('*').where('property','=',id).andWhere('name','=','tenant_screening_criteria')
+                if(existing[0]){
+                    existing[0].property = data.id!
+                    existing[0].name = data.name!
+                    existing[0].document_url = upload[0].name ?? existing[0].document_url
+                    await existing[0].save()
+                }else{
+                    await PropertyLegalRequirement.create(data)
+                }
+                
             }
 
             if(request.file('legal_disclosure_doc')){
                 const upload = await new FileUploadService().uploadFiles(request,'legal_disclosure_doc','legal-documents')
                 data = {property:id,name:'legal_disclosure',description:legal_disclosure,document_url:upload[0].name}
-                await PropertyLegalRequirement.updateOrCreate({property:id,name:'legal_disclosure'},data)
+                const existing = await PropertyLegalRequirement.query().select('*').where('property','=',id).andWhere('name','=','legal_disclosure')
+                if(existing[0]){
+                    existing[0].property = data.id!
+                    existing[0].name = data.name!
+                    existing[0].document_url = upload[0].name ?? existing[0].document_url
+                    await existing[0].save()
+                }else{
+                    await PropertyLegalRequirement.create(data)
+                }
             }
             return sendSuccess(response,{message:"Legal records updated", code:200})
         } catch (error) {
