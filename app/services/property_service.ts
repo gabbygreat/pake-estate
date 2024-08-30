@@ -34,7 +34,9 @@ export default class PropertyService{
                 city,postal_code,
                 state,country,longitude,
                 latitude,
-                property_description
+                property_description,
+                bedrooms,
+                bathrooms
             } = request.body()
             let property:Property
             if(id){
@@ -60,6 +62,8 @@ export default class PropertyService{
             property.current_state = 'draft'
             property.property_description = property_description
             property.owner_id = property.owner_id ?? owner
+            property.bedrooms = bedrooms
+            property.bathrooms = bathrooms
             await property.save()
             return sendSuccess(response,{message:"Property information updated",data:property})
         } catch (error) {
@@ -205,48 +209,55 @@ export default class PropertyService{
     async handlePropertyLegalInfo(request:Request,response:Response){
         try {
             const { tenant_screening_criteria, legal_disclosure, id } = request.body()
-            let upload1 = ''
-            if(request.file('tenant_screening_criteria_doc')){
-                const upload = await new FileUploadService().uploadFiles(request,'tenant_screening_criteria_doc','legal-documents')
-                upload1 = upload[0].name
-                console.log(upload1)
+            const tenant_screening_criteria_doc = request.file('tenant_screening_criteria_doc')
+            const legal_disclosure_doc = request.file('legal_disclosure_doc')
+            const files = {tenant_screening_criteria_doc:'',legal_disclosure_doc:''}
+            //Upload files
+            const uploadService = new FileUploadService()
+            if(tenant_screening_criteria_doc){
+                const uploadedFile = await uploadService.uploadFiles(request,'tenant_screening_criteria_doc','legal-documents')
+                files['tenant_screening_criteria_doc'] = uploadedFile[0].name
             }
-    
-            const existing = await PropertyLegalRequirement.query().select('*').where('property','=',id).andWhere('name','=','tenant_screening_criteria')
-                if(existing[0]){
-                    existing[0].property = id
-                    existing[0].name = 'tenant_screening_criteria'
-                    existing[0].description = tenant_screening_criteria
-                    existing[0].document_url = upload1 ?? existing[0].document_url
-                    await existing[0].save()
-                }else{
-                    await PropertyLegalRequirement.create({
-                        property:id,
-                        name:'tenant_screening_criteria',
-                        description:tenant_screening_criteria,
-                        document_url:upload1
-                    })
-                }
-            let upload2 = ''
-            if(request.file('legal_disclosure_doc')){
-                const upload = await new FileUploadService().uploadFiles(request,'legal_disclosure_doc','legal-documents')
-                upload2 = upload[0].name
+            if(legal_disclosure_doc){
+                const uploadedFile = await uploadService.uploadFiles(request,'legal_disclosure_doc','legal-documents')
+                files['legal_disclosure_doc'] = uploadedFile[0].name
             }
-            const existing2 = await PropertyLegalRequirement.query().select('*').where('property','=',id).andWhere('name','=','legal_disclosure')
-                if(existing2[0]){
-                    existing2[0].property = id
-                    existing2[0].name = 'legal_disclosure'
-                    existing2[0].description = legal_disclosure
-                    existing2[0].document_url = upload2 ?? existing2[0].document_url
-                    await existing2[0].save()
-                }else{
-                    await PropertyLegalRequirement.create({
-                        name: 'legal_disclosure',
-                        description: legal_disclosure,
-                        document_url: upload2,
-                        property: id
-                    })
+            //Update records for tenant_screening_criteria
+            if(tenant_screening_criteria_doc || tenant_screening_criteria){
+                let doc:PropertyLegalRequirement
+                doc = (await PropertyLegalRequirement.query().select('*').whereRaw('property = ? AND name = ?',[id,'tenant_screening_criteria']))[0]
+                if(!doc){
+                    doc = new PropertyLegalRequirement()
                 }
+                doc.name = 'tenant_screening_criteria'
+                doc.description = tenant_screening_criteria
+                if(doc.document_url && files['tenant_screening_criteria_doc'].length){
+                    try {
+                        await uploadService.removeFile(doc.document_url,'legal-documents')
+                    } catch{}
+                }
+                doc.document_url = files['tenant_screening_criteria_doc'] || doc.document_url
+                doc.property = id
+                await doc.save()
+            }
+            //Update records for legal_disclosure
+            if(legal_disclosure_doc || legal_disclosure){
+                let doc:PropertyLegalRequirement
+                doc = (await PropertyLegalRequirement.query().select('*').whereRaw('property = ? AND name = ?',[id,'legal_disclosure']))[0]
+                if(!doc){
+                    doc = new PropertyLegalRequirement()
+                }
+                doc.name = 'legal_disclosure'
+                doc.description = legal_disclosure
+                if(doc.document_url && files['legal_disclosure_doc']){
+                    try {
+                        await uploadService.removeFile(doc.document_url,'legal-documents')
+                    } catch{}
+                }
+                doc.document_url = files['legal_disclosure_doc'] || doc.document_url
+                doc.property = id
+                await doc.save()
+            }
             return sendSuccess(response,{message:"Legal records updated", code:200})
         } catch (error) {
             throw error

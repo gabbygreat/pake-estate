@@ -80,7 +80,9 @@ export default class PropertiesController {
                 page?: number
                 perPage?:number,
                 latitude?:number,
-                longitude?:number
+                longitude?:number,
+                bedrooms?:number,
+                bathrooms?:number
             }
             const input:Filter = request.qs()
             const query = Property.query()
@@ -104,6 +106,12 @@ export default class PropertiesController {
 
             if(input.forReview){
                 query.orderBy('total_reviews', 'desc')
+            }
+            if(input.bedrooms){
+                query.andWhere('bedrooms','=',input.bedrooms)
+            }
+            if(input.bathrooms){
+                query.andWhere('bathrooms','=',input.bathrooms)
             }
             if(input.sort){
                 query.orderBy('created_at', input.sort === 'oldest' ? 'asc' : 'desc')

@@ -67,6 +67,12 @@ export default class Property extends BaseModel {
   declare independent_spaces: string
 
   @column()
+  declare bedrooms: number
+
+  @column()
+  declare bathrooms: number
+
+  @column()
   declare house_number: string
 
   @column()
