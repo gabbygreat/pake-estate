@@ -36,10 +36,10 @@ export default class MaintenanceController {
                     const images = await this.uploadService.uploadFiles(request,'images','maintenance-requests')
                     const names:string[] = []
                     images.forEach((e)=>names.push(e.name))
-                    maintenanceRequest.images = [
-                        ...(maintenanceRequest?.images ?? []),
+                    maintenanceRequest.images = JSON.stringify([
+                        ...(maintenanceRequest?.images as string[] ?? []),
                         ...names
-                    ]
+                    ]) as any
                 }
                 await maintenanceRequest.save()
                 return sendSuccess(response,{message:'Maintenance request received'})
