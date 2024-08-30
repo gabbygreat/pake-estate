@@ -37,7 +37,7 @@ export default class MaintenanceController {
                     const names:string[] = []
                     images.forEach((e)=>names.push(e.name))
                     maintenanceRequest.images = [
-                        ...maintenanceRequest.images,
+                        ...maintenanceRequest?.images,
                         ...names
                     ]
                 }
