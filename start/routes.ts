@@ -12,6 +12,7 @@ import router from '@adonisjs/core/services/router'
 import './routes/user-routes.js'
 import './routes/property-route.js'
 import './routes/tenant-route.js'
+import './routes/maintenance_routes.js'
 
 router.get('/', async () => {
   return {
