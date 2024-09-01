@@ -37,6 +37,7 @@ new Ignitor(APP_ROOT, { importer: IMPORTER })
       BaseModel.namingStrategy = new SnakeCaseNamingStrategy()
     })
     app.listen('SIGTERM', () => app.terminate())
+    
     app.listenIf(app.managedByPm2, 'SIGINT', () => app.terminate())
   })
   .httpServer()

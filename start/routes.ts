@@ -13,6 +13,7 @@ import './routes/user-routes.js'
 import './routes/property-route.js'
 import './routes/tenant-route.js'
 import './routes/maintenance_routes.js'
+import './routes/chat-messages-routes.js'
 
 router.get('/', async () => {
   return {
