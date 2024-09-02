@@ -17,7 +17,7 @@ class Ws {
       cors: {
         origin: '*',
       },
-      path: '/'
+      path: '/socket'
     })
   }
 }
