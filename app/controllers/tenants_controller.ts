@@ -63,7 +63,7 @@ export default class TenantsController {
             const {
                 property_id,dob,fullname,mobile,email,gender,rental_history,employed,total_pets,
                 employment_type,job_position,job_salary,company_name,pet_names,pet_types,pet_breeds,
-                lease_start_date,lease_term,lease_payment,offering_price,employee_name
+                lease_start_date,lease_term,lease_payment,offering_price,employee_name,any_pets
             } = request.body()
             
             await db.transaction(async(client)=>{
@@ -91,6 +91,7 @@ export default class TenantsController {
                 pet_breeds,
                 lease_payment,
                 lease_term,
+                any_pets,
                 lease_start_date,
                 status: 'in-progress',
                 property_owner_id:owner[0].owner_id

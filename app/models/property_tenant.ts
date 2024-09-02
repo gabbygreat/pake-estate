@@ -56,6 +56,9 @@ export default class PropertyTenant extends BaseModel {
   declare company_name: string
 
   @column()
+  declare any_pets: boolean
+
+  @column()
   declare pet_names: string[]
 
   @column()
