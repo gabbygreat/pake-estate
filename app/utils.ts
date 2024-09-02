@@ -94,3 +94,8 @@ export function sendError(
       return sendError(response,{message:''})
     }
   }
+
+
+  export function lowerCase(text:string){
+    return text.toLowerCase()
+  }

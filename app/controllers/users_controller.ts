@@ -12,6 +12,7 @@ import NotificationService from '#services/notification_service'
 import EmailService ,{VerificationEmail,WelcomeEmail,ForgotPasswordEmail} from '#services/email_service'
 import env from '#start/env'
 import Notification from '#models/notification'
+import { lowerCase } from '../utils.js'
 
 @inject()
 export default class UsersController {
@@ -36,7 +37,7 @@ export default class UsersController {
 
             await db.transaction(async(client)=>{
                 //Create account
-                const user = await User.create({firstname,lastname,email,password,phone_number},{client})
+                const user = await User.create({firstname,lastname,email:lowerCase(email),password,phone_number},{client})
                 //Generate Email verification code
                 const verificationOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification'})
                 await this.emailService.setTemplate<VerificationEmail>('email_verification',
@@ -65,7 +66,7 @@ export default class UsersController {
     async resendEmailVerificationCode({request,response}:HttpContext){
         try {
             const { email } = request.params()
-            const user = await User.findBy('email',email)
+            const user = await User.findBy('email',lowerCase(email))
            if(user){
             const prevOTP = await this.otpService.getRedisCode({user_id:user.id,code_type:'email_verification'})
             if(prevOTP){
@@ -112,7 +113,7 @@ export default class UsersController {
         try {
             await request.validateUsing(createLoginValidator)
             const { email, password } = request.body()
-            const user = await User.verifyCredentials(email,password)
+            const user = await User.verifyCredentials(lowerCase(email),password)
             if (user){
                 if(!user.email_verified){
                     const prevOTP = await this.otpService.getRedisCode({user_id:user.id,code_type:'email_verification'})
@@ -169,7 +170,7 @@ export default class UsersController {
         try {
             await request.validateUsing(createEmailVerificationValidator)
             const { email, verification_code } = request.body()
-            const user = await User.findBy('email',email)
+            const user = await User.findBy('email',lowerCase(email))
             if(user){
                 const prevOTP = await this.otpService.getRedisCode({user_id:user.id,code_type:'email_verification'})
                 if(prevOTP && prevOTP === verification_code){
@@ -199,8 +200,7 @@ export default class UsersController {
     async forgotPasswordRequest({request,response}:HttpContext){
         try {
             const { email } = request.params()
-            console.log(email)
-            const user = await User.findBy('email',email)
+            const user = await User.findBy('email',lowerCase(email))
             if(user){
                 if(!user.email_verified){
                     const prevOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification'})
@@ -252,7 +252,7 @@ export default class UsersController {
     async resetPassword({request,response}:HttpContext){
         try {
             const { password,token,email } = request.body()
-            const user = await User.findBy('email',email)
+            const user = await User.findBy('email',lowerCase(email))
             if(user){
                 const prevOTP = await this.otpService.getRedisCode({user_id:user.id,code_type:'password_reset'})
                 if(prevOTP && prevOTP === token){
