@@ -22,6 +22,8 @@ jobs:
             git pull origin staging --no-ff
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
+            nvm use 20
+            pnpm install
             node ace build
             node ace migration:run
             cp -R ./node_modules ../server/
