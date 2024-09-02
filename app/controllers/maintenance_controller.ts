@@ -117,7 +117,7 @@ export default class MaintenanceController {
                 return sendError(response,{message:"Invalid status type", code:400})
             }
 
-            const query = MaintenanceRequest.query().select('*').where('report_title','!=','')
+            const query = MaintenanceRequest.query().select('*').where('request_title','!=','')
             .preload('applicantInfo',(applicant)=>applicant.select(['id','firstname','lastname','email']))
             .preload('ownerInfo',(owner)=>owner.select(['id','firstname','lastname','email']))
             .preload('propertyInfo',(property)=>property.select(['property_title']))
