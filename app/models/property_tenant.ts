@@ -1,6 +1,5 @@
 import { DateTime } from 'luxon'
 import { BaseModel, belongsTo, column, hasOne } from '@adonisjs/lucid/orm'
-import type { RentalHistory } from '../types.js'
 import TenantDocument from './tenant_document.js'
 import type{ BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import { hasMany } from '@adonisjs/lucid/orm'
@@ -35,7 +34,7 @@ export default class PropertyTenant extends BaseModel {
   declare gender: 'male'|'female'
 
   @column()
-  declare rental_history: RentalHistory
+  declare rental_history: string
 
   @column()
   declare employed: boolean

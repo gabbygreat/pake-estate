@@ -78,7 +78,7 @@ export default class TenantsController {
                 email,
                 employee_name,
                 gender,
-                rental_history,
+                rental_history:JSON.stringify(rental_history),
                 employed,
                 total_pets,
                 employment_type,
