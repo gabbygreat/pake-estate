@@ -22,9 +22,9 @@ export default class TenantsController {
                 await request.validateUsing(createTenantValidator)
             //Attend to ID files
             const identity_documents = request.files('identity_documents_files')
-            const identity_documents_names:string[] = request.input('identity_documents_names')
+            const identity_documents_names:string[] = request.input('identity_document_names')
             //Users must submit all document tags
-            console.log(identity_documents_names)
+
             if(identity_documents.length !== identity_documents_names.length){
                 return sendError(response,{message:'Please provide ID document information,tags and files must match!',code:400})
             }
@@ -33,7 +33,6 @@ export default class TenantsController {
             const bank_documents = request.files('bank_statement_files')
             const bank_documents_names:string[] = request.input('bank_statement_names')
             //Users must submit all document tags
-            console.log(bank_documents_names)
             if(bank_documents.length !== bank_documents_names.length){
                 return sendError(response,{message:'Please provide Bank stagement information,tags and files must match!',code:400})
             }
@@ -132,7 +131,6 @@ export default class TenantsController {
             return sendSuccess(response,{message:"Application Submitted", code:200})
         })
         } catch (error) {
-            console.log(error)
             if(docs.length){
                 docs.forEach(async(e)=>{
                     this.uploadService.removeFile(e.document_url!,'tenant-documents')
