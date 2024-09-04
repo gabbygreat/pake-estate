@@ -8,6 +8,7 @@ export const createTenantValidator = vine.compile(
         dob: vine.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
         mobile: vine.string().mobile(),
         gender: vine.enum(['male','female']),
+        identity_documents_names: vine.array(vine.string()).optional(),
          //rental_history: vine.string(),//vine.object({
         //     address: vine.string(),
         //     landlord_name: vine.string().nullable(),
