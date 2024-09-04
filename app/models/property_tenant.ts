@@ -58,16 +58,16 @@ export default class PropertyTenant extends BaseModel {
   declare any_pets: boolean
 
   @column()
-  declare pet_names: string[]
+  declare pet_names: string
 
   @column()
-  declare pet_types: string[]
+  declare pet_types: string
 
   @column()
   declare total_pets: number
 
   @column()
-  declare pet_breeds: string[]
+  declare pet_breeds: string
 
   @column()
   declare lease_start_date: Date
