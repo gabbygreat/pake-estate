@@ -81,17 +81,17 @@ export default class TenantsController {
                 email,
                 employee_name,
                 gender,
-                rental_history:JSON.stringify(rental_history || {}),
+                rental_history:JSON.stringify(rental_history ?? {}),
                 employed,
                 total_pets: total_pets || 0,
                 employment_type,
                 job_position,
                 job_salary,
                 company_name,pet_names,
-                pet_types: JSON.stringify(pet_types || []),
+                pet_types: JSON.stringify(pet_types ?? []),
                 offering_price,
                 applicant_id: auth.use('api').user?.id,
-                pet_breeds: JSON.stringify(pet_breeds || []),
+                pet_breeds: JSON.stringify(pet_breeds ?? []),
                 lease_payment,
                 lease_term,
                 any_pets,
@@ -133,6 +133,7 @@ export default class TenantsController {
             return sendSuccess(response,{message:"Application Submitted", code:200})
         })
         } catch (error) {
+            console.log(error)
             if(docs.length){
                 docs.forEach(async(e)=>{
                     this.uploadService.removeFile(e.document_url!,'tenant-documents')
