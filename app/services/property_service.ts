@@ -209,19 +209,20 @@ export default class PropertyService{
     async handlePropertyLegalInfo(request:Request,response:Response){
         try {
             const { tenant_screening_criteria, legal_disclosure, id } = request.body()
-            const tenant_screening_criteria_doc = request.file('tenant_screening_criteria_doc')
-            const legal_disclosure_doc = request.file('legal_disclosure_doc')
+            const tenant_screening_criteria_doc = request.files('tenant_screening_criteria_doc')
+            const legal_disclosure_doc = request.files('legal_disclosure_doc')
+            console.log(legal_disclosure)
             let files = {tenant_screening_criteria_doc:'',legal_disclosure_doc:''}
             //Upload files
             const uploadService = new FileUploadService()
             console.log("checking files...")
-            if(tenant_screening_criteria_doc){
+            if(tenant_screening_criteria_doc.length){
                 console.log("uploading files 1...")
                 const uploadedFile = await uploadService.uploadFiles(request,'tenant_screening_criteria_doc','legal-documents')
                 files['tenant_screening_criteria_doc'] = uploadedFile[0].name
                 console.log(uploadedFile[0].name)
             }
-            if(legal_disclosure_doc){
+            if(legal_disclosure_doc.length){
                 console.log("uploading files 2...")
                 const uploadedFile = await uploadService.uploadFiles(request,'legal_disclosure_doc','legal-documents')
                 files['legal_disclosure_doc'] = uploadedFile[0].name
