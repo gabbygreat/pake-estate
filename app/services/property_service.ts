@@ -222,6 +222,7 @@ export default class PropertyService{
                 const uploadedFile = await uploadService.uploadFiles(request,'legal_disclosure_doc','legal-documents')
                 files['legal_disclosure_doc'] = uploadedFile[0].name
             }
+            console.log(files)
             //Update records for tenant_screening_criteria
             if(tenant_screening_criteria_doc || tenant_screening_criteria){
                 let doc:PropertyLegalRequirement
@@ -256,6 +257,7 @@ export default class PropertyService{
                 }
                 doc.document_url = files['legal_disclosure_doc'] || doc.document_url
                 doc.property = id
+                console.log("saving doc")
                 await doc.save()
             }
             return sendSuccess(response,{message:"Legal records updated", code:200})
