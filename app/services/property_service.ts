@@ -211,25 +211,20 @@ export default class PropertyService{
             const { tenant_screening_criteria, legal_disclosure, id } = request.body()
             const tenant_screening_criteria_doc = request.files('tenant_screening_criteria_doc')
             const legal_disclosure_doc = request.files('legal_disclosure_doc')
-            console.log(tenant_screening_criteria_doc)
+
             let files = {tenant_screening_criteria_doc:'',legal_disclosure_doc:''}
             //Upload files
             const uploadService = new FileUploadService()
-            console.log("checking files...")
             if(tenant_screening_criteria_doc.length){
-                console.log("uploading files 1...")
                 const uploadedFile = await uploadService.uploadFiles(request,'tenant_screening_criteria_doc','legal-documents')
                 files['tenant_screening_criteria_doc'] = uploadedFile[0].name
-                console.log(uploadedFile[0].name)
             }
-            console.log(legal_disclosure_doc)
+
             if(legal_disclosure_doc.length){
-                console.log("uploading files 2...")
                 const uploadedFile = await uploadService.uploadFiles(request,'legal_disclosure_doc','legal-documents')
                 files['legal_disclosure_doc'] = uploadedFile[0].name
-                console.log(uploadedFile[0].name)
             }
-            console.log(files)
+ 
             //Update records for tenant_screening_criteria
             if(tenant_screening_criteria_doc || tenant_screening_criteria){
                 let doc:PropertyLegalRequirement
