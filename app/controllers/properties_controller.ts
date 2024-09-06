@@ -99,7 +99,7 @@ export default class PropertiesController {
             
             !input.owner ? query.andWhere('current_state','=','published') : (()=>{})()
             
-            if(input.owner){
+            if(input.owner && input.owner === true){
                 const user = await auth.authenticate()
                 query.andWhere('owner_id','=',user.id)
             }
