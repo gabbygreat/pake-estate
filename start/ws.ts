@@ -2,6 +2,22 @@ import app from '@adonisjs/core/services/app'
 import ws_service from '#services/ws_service'
 import Message from '#models/message'
 import emitter from '@adonisjs/core/services/emitter'
+import { createAdapter } from "@socket.io/redis-adapter";
+import { Redis } from "ioredis";
+import env from '#start/env'
+
+const pubClient = new Redis({
+  host: env.get('REDIS_HOST') as any,
+  port: env.get('REDIS_PORT') as any,
+  password: env.get('REDIS_PASSWORD') as any,
+});
+pubClient.on('connect',()=>{
+  console.log("Connected to socket adapter")
+})
+pubClient.on('error',()=>{
+  console.error("Error connecting to socker adapter")
+})
+const subClient = pubClient.duplicate();
 
 interface OnlineStat{
     senderId: string,
@@ -12,8 +28,9 @@ app.ready(() => {
     ws_service.boot()
     const io = ws_service.io
 
+    io?.adapter(createAdapter(pubClient, subClient))
+
     io?.on('connection', (socket) => {
-      console.log(socket.id)
 
       socket.on('login',({userId}:{userId:string})=>{
         socket.join(userId)
