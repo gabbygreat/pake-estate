@@ -103,8 +103,8 @@ export default class MaintenanceController {
         try {
             const user = auth.use('api').user!
             interface Filter {
-                owner: boolean,
-                applicant: boolean,
+                owner: boolean|string,
+                applicant: boolean|string,
                 search: string,
                 sort: 'oldest'|'recent'
                 status:'rejected'|'ongoing'|'pending'|'done'
@@ -122,10 +122,10 @@ export default class MaintenanceController {
             .preload('ownerInfo',(owner)=>owner.select(['id','firstname','lastname','email']))
             .preload('propertyInfo',(property)=>property.select(['property_title']))
             
-            if(input.owner){
+            if(input.owner && (input.owner === 'true' || input.owner === true) ){
                 query.andWhere('owner_id','=',user.id)
             }
-            if(input.applicant){
+            if(input.applicant && (input.applicant === true || input.applicant === 'true') ){
                 query.andWhere('applicant_id','=',user.id)
             }
             if(input.status){

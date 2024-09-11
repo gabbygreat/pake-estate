@@ -73,9 +73,9 @@ export default class PropertiesController {
     async listProperties({request,auth,response}:HttpContext){
         try {
             interface Filter {
-                owner?:boolean //IF THIS IS OWNER,FETCH BOTH PUBLISHED AND UNPUBLISHED ELSE FETCH ONLY PUBLISHED
+                owner?:boolean|string //IF THIS IS OWNER,FETCH BOTH PUBLISHED AND UNPUBLISHED ELSE FETCH ONLY PUBLISHED
                 search?: string
-                forReview?:boolean,
+                forReview?:boolean|string,
                 sort?:'recent'|'oldest'
                 page?: number
                 perPage?:number,
@@ -97,16 +97,17 @@ export default class PropertiesController {
                 })
             }
             
-            !input.owner ? query.andWhere('current_state','=','published') : (()=>{})()
-            
-            if(input.owner && input.owner === true){
+            !input.owner || input.owner === 'true' ? query.andWhere('current_state','=','published') : (()=>{})()
+           
+            if(input.owner && (input.owner === true || input.owner === 'true')){
                 const user = await auth.authenticate()
                 query.andWhere('owner_id','=',user.id)
             }
 
-            if(input.forReview){
+            if(input.forReview && (input.forReview === true || input.forReview === 'true')){
                 query.orderBy('total_reviews', 'desc')
             }
+
             if(input.bedrooms){
                 query.andWhere('bedrooms','=',input.bedrooms)
             }
@@ -228,12 +229,12 @@ export default class PropertiesController {
                 perPage?:number
                 start_date?:string
                 end_date?:string,
-                for_user?:boolean
+                for_user?:boolean|string
             }
             const input:Filter = request.qs()
             const properties = Property.query().select(['id','property_title','ask_price','general_rent_fee','total_purchases'])
             .where('property_type','!=','')
-            if(input.for_user){
+            if(input.for_user && (input.for_user === true || input.for_user === 'true')){
                 const user = await auth.use('api').authenticate()
                 properties.where('owner_id','=',user?.id!)
             }
