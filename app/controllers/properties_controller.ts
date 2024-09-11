@@ -284,4 +284,23 @@ export default class PropertiesController {
             return sendError(response,{error:error,message:error.message})
         }
     }
+
+    public async deleteProperty({ request,response,auth }:HttpContext){
+        try {
+            const { id } = request.params()
+            const user = auth.use('api').user
+            const property = await Property.find(id)
+            if(property && user){
+                if(property.owner_id === user.id){
+                    
+                }else{
+                    return sendError(response,{message:"You cannot delete this property", code:403})
+                }
+            }else{
+                return sendError(response,{message:"Property not found", code:404})
+            }
+        } catch (error) {
+            return sendError(response,{error:error,message:error.message})
+        }
+    }
 }

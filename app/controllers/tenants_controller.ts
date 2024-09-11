@@ -298,4 +298,37 @@ export default class TenantsController {
             return sendError(response,{message:error.message,code:500}) 
         }
     }
+
+    public async deleteApplication({request,auth,response}:HttpContext){
+        try {
+            const { id } = request.params()
+            const user = auth.use('api').user!
+            const application = await PropertyTenant.find(id)
+            if(application){
+                if(application.applicant_id === user.id){
+                    //Remove all documents
+                    const documents = await TenantDocument.query().select(['document_url']).where('tenant_id','=',id)
+                    for(let i=0; i < documents.length; i++){
+                        try {
+                            await this.uploadService.removeFile(documents[i].document_url,'tenant-documents')
+                        } catch{/** */}
+                    }
+                    await application.delete()
+                    return sendSuccess(response,{
+                        message:"Application information deleted",
+                        code: 200
+                    })
+                }else{
+                    return sendError(response,{
+                        message:"You cannot delete this application/tenant information",
+                        code: 403
+                    })
+                }
+            }else{
+                return sendError(response,{message:"Application not found", code:404})
+            }
+        } catch (error) {
+            return sendError(response,{message:error.message,code:500}) 
+        }
+    }
 }

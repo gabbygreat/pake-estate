@@ -14,5 +14,6 @@ router.group(()=>{
     router.get('top-selling',[PropertyController,'topSellingProperties'])
     router.patch('publish',[PropertyController,'publishProperty']).use(middleware.auth({guards:['api']}))
     router.get('hide-property/:id',[PropertyController,'hideProperty']).use(middleware.auth({guards:['api']}))
+    //router.delete('remove/:id',[PropertyController,'deleteProperty'])
     
 }).prefix('/property')
