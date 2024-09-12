@@ -331,4 +331,32 @@ export default class TenantsController {
             return sendError(response,{message:error.message,code:500}) 
         }
     }
+
+    public async listTenantsProperties({auth,response}:HttpContext){
+        try {
+            const tenant = auth.use('api').user!
+            const properties = await PropertyTenant
+            .query()
+            .select(['id','property_id','applicant_id'])
+            .where((q)=>{
+                q.whereRaw('applicant_id = ? AND status = ?',[tenant?.id,'approved'])
+            })
+            .preload('propertyInfo',(property)=>{
+                property.select(['property_title'])
+            })
+            const data:Array<{property_id:string,property_title:string}> = []
+            
+            properties.forEach((e)=>data.push({
+                property_id: e.property_id,
+                property_title: e.propertyInfo.property_title
+            }))
+
+            return sendSuccess(response,{
+                message:"Tenant Property Listing",
+                data: data
+            })
+        } catch (error) {
+            return sendError(response,{message:error.message,code:500}) 
+        }
+    }
 }
