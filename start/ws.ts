@@ -1,34 +1,46 @@
-import app from '@adonisjs/core/services/app'
+//import app from '@adonisjs/core/services/app'
 import ws_service from '#services/ws_service'
 import Message from '#models/message'
 import emitter from '@adonisjs/core/services/emitter'
-import { createAdapter } from "@socket.io/redis-adapter";
-import { Redis } from "ioredis";
-import env from '#start/env'
-
-const pubClient = new Redis({
-  host: env.get('REDIS_HOST') as any,
-  port: env.get('REDIS_PORT') as any,
-  password: env.get('REDIS_PASSWORD') as any,
-});
-pubClient.on('connect',()=>{
-  console.log("Connected to socket adapter")
-})
-pubClient.on('error',()=>{
-  console.error("Error connecting to socker adapter")
-})
-const subClient = pubClient.duplicate();
+// import { createAdapter } from "@socket.io/redis-adapter";
+// import { Redis } from "ioredis";
+// import env from '#start/env'
 
 interface OnlineStat{
     senderId: string,
     ref_userId: string
 }
 
-app.ready(() => {
-    ws_service.boot()
-    const io = ws_service.io
+ws_service.boot()
+const io = ws_service.io
 
-    io?.adapter(createAdapter(pubClient, subClient))
+// app.start(() => {
+  // var subClient;
+  // var pubClient;
+  // (async()=>{
+
+  //   pubClient = new Redis({
+  //     host: env.get('REDIS_HOST') as any,
+  //     port: env.get('REDIS_PORT') as any,
+  //     password: env.get('REDIS_PASSWORD') as any,
+  //   });
+    
+  //   pubClient.on('connect',()=>{
+  //     console.log("Connected to socket adapter")
+  //     return;
+  //   })
+
+  //   pubClient.on('error',()=>{
+  //     console.error("Error connecting to socker adapter")
+  //     return;
+  //   })
+
+  //   subClient = pubClient.duplicate();
+
+  //   io?.adapter(createAdapter(pubClient, subClient))
+  
+  // })()
+
 
     io?.on('connection', (socket) => {
 
@@ -60,4 +72,4 @@ app.ready(() => {
     //TODO::HANDLE DISCONNECTION AND FREEING ROOMS
 
 
-})
+//})
