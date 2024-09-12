@@ -26,6 +26,7 @@ jobs:
             pnpm install
             node ace build
             node ace migration:run
-            cp -R ./node_modules ../server/
             cp -R ./build/* ../server/
+            cd ../server
+            pnpm install
             pm2 reload estate-api-staging
