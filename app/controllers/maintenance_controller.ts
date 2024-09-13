@@ -128,10 +128,10 @@ export default class MaintenanceController {
             if(input.applicant && (input.applicant === true || input.applicant === 'true') ){
                 query.andWhere('applicant_id','=',user.id)
             }
-            if(input.status){
+            if(input.status && input.status !== 'undefined' as any && input.status !== null && input.status !== undefined){
                 query.andWhere('status','=',input.status)
             }
-            if(input.search){
+            if(input.search && input.search !== 'undefined' as any && input.search !== null && input.search !== undefined && input.search !=""){
                 query.join('properties','maintenance_requests.property_id','properties.id')
                 .where((q)=>q.whereRaw(`maintenance_requests.request_title % ? OR properties.property_title % ?`,[Array(2).fill(input.search)]))
                 .groupBy(['properties.id','maintenance_requests.id'])

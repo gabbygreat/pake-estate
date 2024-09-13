@@ -279,7 +279,7 @@ export default class TenantsController {
             if(filter.status){
                 query.andWhere('status','=',filter.status)
             }
-            if(filter.search){
+            if(filter.search && filter.search !== null && filter.search !== 'undefined' as any && filter.search !== undefined){
                 // query.andWhere((q)=>q.whereRaw('email % ? OR fullname % ?',[...Array(2).fill(filter.search)]))
                 query.join('properties','property_tenants.property_id','=','properties.id')
                 .where((q)=>q.whereRaw('properties.property_title % ?',[filter.search]))

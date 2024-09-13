@@ -108,10 +108,10 @@ export default class PropertiesController {
                 query.orderBy('total_reviews', 'desc')
             }
 
-            if(input.bedrooms){
+            if(input.bedrooms && input.bedrooms !== null && input.bedrooms !== 'undefined' as any && input.bedrooms !== undefined){
                 query.andWhere('bedrooms','=',input.bedrooms)
             }
-            if(input.bathrooms){
+            if(input.bathrooms && input.bedrooms !== null && input.bedrooms !== 'undefined' as any && input.bedrooms !== undefined){
                 query.andWhere('bathrooms','=',input.bathrooms)
             }
             if(input.sort){
