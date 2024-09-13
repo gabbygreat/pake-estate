@@ -97,7 +97,7 @@ export default class PropertiesController {
                 })
             }
             
-            !input.owner || input.owner === 'true' ? query.andWhere('current_state','=','published') : (()=>{})()
+            !input.owner || input.owner !== 'true' || input.owner !== true as any ? query.andWhere('current_state','=','published') : (()=>{})()
            
             if(input.owner && (input.owner === true || input.owner === 'true')){
                 const user = await auth.authenticate()
