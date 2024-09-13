@@ -113,10 +113,6 @@ export default class MaintenanceController {
             }
             const input:Filter = request.qs() as Filter
 
-            if(!/^rejected|ongoing|pending|done/.test(input.status)){
-                return sendError(response,{message:"Invalid status type", code:400})
-            }
-
             const query = MaintenanceRequest.query().select('*').where('request_title','!=','')
             .preload('applicantInfo',(applicant)=>applicant.select(['id','firstname','lastname','email']))
             .preload('ownerInfo',(owner)=>owner.select(['id','firstname','lastname','email']))
@@ -129,6 +125,9 @@ export default class MaintenanceController {
                 query.andWhere('applicant_id','=',user.id)
             }
             if(input.status && input.status !== 'undefined' as any && input.status !== null && input.status !== undefined){
+                if(!/^rejected|ongoing|pending|done/.test(input.status)){
+                    return sendError(response,{message:"Invalid status type", code:400})
+                }
                 query.andWhere('status','=',input.status)
             }
             if(input.search && input.search !== 'undefined' as any && input.search !== null && input.search !== undefined && input.search !=""){
