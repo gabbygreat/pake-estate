@@ -101,7 +101,7 @@ export default class PropertiesController {
                 const user = await auth.authenticate()
                 query.andWhere('owner_id','=',user.id)
             }else{
-                query.andWhere('current_state','=','published')
+                query.andWhere('current_state','=','published').andWhere('hidden','=',false)
             }
 
             if(input.forReview && (input.forReview === true || input.forReview === 'true')){
@@ -233,7 +233,7 @@ export default class PropertiesController {
             }
             const input:Filter = request.qs()
             const properties = Property.query().select(['id','property_title','ask_price','general_rent_fee','total_purchases'])
-            .where('property_type','!=','')
+            .where('property_type','!=','').andWhere('hidden','=',false)
             if(input.for_user && (input.for_user === true || input.for_user === 'true')){
                 const user = await auth.use('api').authenticate()
                 properties.where('owner_id','=',user?.id!)
@@ -274,7 +274,7 @@ export default class PropertiesController {
                 if(property.owner_id !== owner_id){
                     return sendError(response,{message:"You cannot perform this operation", code:403}) 
                 }
-                property.current_state = 'draft'
+                property.hidden = !property.hidden
                 await property.save()
                 return sendSuccess(response,{message:'Property status updated'})
             }else{

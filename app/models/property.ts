@@ -28,6 +28,9 @@ export default class Property extends BaseModel {
   declare flagged: string
 
   @column()
+  declare hidden: boolean
+
+  @column()
   declare total_reviews: number
 
   @column()
@@ -108,7 +111,7 @@ export default class Property extends BaseModel {
   declare maintainance_information: string
 
   @column()
-  declare furnishing: 'furnished'|'semi-furnished'|'fully-furnished'
+  declare furnishing: 'un-furnished'|'furnished'|'semi-furnished'|'fully-furnished'
 
   @column()
   declare general_rent_fee: number

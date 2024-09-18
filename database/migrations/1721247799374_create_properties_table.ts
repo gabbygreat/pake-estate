@@ -35,7 +35,7 @@ export default class extends BaseSchema {
       table.boolean('available').defaultTo(true)
       table.string('pet_policy').nullable()
       table.string('maintainance_information').nullable()
-      table.enu('furnishing', ['furnished', 'semi-furnished', 'fully-furnished']).nullable()
+      table.string('furnishing').nullable()
       table.decimal('general_rent_fee').nullable()
       table.string('general_lease_time').nullable()
       table.string('general_renewal_cycle').nullable()
