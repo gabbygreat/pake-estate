@@ -11,7 +11,7 @@ export default class PropertyFee extends BaseModel {
   declare name: string
 
   @column()
-  declare amount: string
+  declare amount: number
 
   @column()
   declare property:string
