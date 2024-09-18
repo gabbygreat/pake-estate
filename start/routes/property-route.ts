@@ -11,6 +11,7 @@ router.group(()=>{
     router.get('info/:id',[PropertyController,'propertyInfo'])
     router.post('review',[PropertyController,'submitReview']).use(middleware.auth({guards:['api']}))
     router.get('review-summary',[PropertyController,'propertyReviewSummary'])
+    router.get('my-review',[PropertyController,'userPropertyReview']).use(middleware.auth({guards:['api']}))
     router.get('top-selling',[PropertyController,'topSellingProperties'])
     router.patch('publish',[PropertyController,'publishProperty']).use(middleware.auth({guards:['api']}))
     router.get('hide-property/:id',[PropertyController,'hideProperty']).use(middleware.auth({guards:['api']}))

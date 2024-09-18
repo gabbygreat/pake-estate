@@ -222,6 +222,23 @@ export default class PropertiesController {
         }
     }
 
+
+    public async userPropertyReview({request,auth,response}:HttpContext){
+        try {
+            const { property_id } = request.qs()
+            const user = auth.use('api').user!
+            const reviews = await PropertyReview.query()
+            .select('*')
+            
+            .where('property','=',property_id)
+            .andWhere('user_id','=', user.id)
+
+            return sendSuccess(response,{message:"My reviews", data: reviews})
+        } catch (error) {
+            return sendError(response,{error:error,message:error.message})
+        }
+    }
+
     public async topSellingProperties({request,auth,response}:HttpContext){
         try {
             interface Filter{
