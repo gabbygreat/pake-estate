@@ -7,6 +7,8 @@ import Property from '#models/property'
 import PropertyReview from '#models/property_review'
 import { createReviewValidator } from '#validators/review'
 import { inject } from '@adonisjs/core'
+import PropertyLegalRequirement from '#models/property_legal_requirement'
+import PropertyTenant from '#models/property_tenant'
 
 @inject()
 export default class PropertiesController {
@@ -309,7 +311,28 @@ export default class PropertiesController {
             const property = await Property.find(id)
             if(property && user){
                 if(property.owner_id === user.id){
-                    
+                    const totalTenants = await PropertyTenant.query().where((q)=>q.whereRaw(`property_id = ? AND status = ?`,[property.id,'approved'])).count('id','total')
+                    if(totalTenants[0] && totalTenants[0].$extras.total >=1){
+                        return sendError(response,{message:"Tenants already exist in this proeprty", code:403})
+                    }else{
+                        //Remove Legal Documents
+                        const documents = await PropertyLegalRequirement.query().select(['document_url']).where('property','=',id)
+                        documents.forEach(async(e)=>{
+                            try {
+                               await this.uploadService.removeFile(e.document_url,'legal-documents') 
+                            } catch{/** */}
+                        })
+                        //Remove Property Media
+                        const media = await PropertyMedia.query().select(['media_url']).where('property','=',id)
+                        media.forEach(async(e)=>{
+                            try {
+                              await this.uploadService.removeFile(e.media_url,'properties')  
+                            } catch {/** */}
+                        })
+                        //Remove Property Information
+                        await property.delete()
+                        return sendSuccess(response,{message:"Property Deleted"})
+                    }
                 }else{
                     return sendError(response,{message:"You cannot delete this property", code:403})
                 }
