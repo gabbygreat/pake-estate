@@ -286,7 +286,7 @@ export default class UsersController {
     async notifications({auth,response}:HttpContext){
         try {
             const user = auth.use('api').user!
-            const data = await Notification.query().select('*').where('user_id','=',user.id)
+            const data = await Notification.query().select('*').where('user_id','=',user.id).orderBy('created_at','desc')
             await Notification.query().where('user_id','=',user.id).update({read:true})
             return sendSuccess(response,{message:'Notifications',data})
         } catch (error) {
