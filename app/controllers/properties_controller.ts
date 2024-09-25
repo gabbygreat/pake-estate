@@ -40,6 +40,7 @@ export default class PropertiesController {
             return sendError(response,{message:error.message,code:500})
         }
     }
+    
 
     async removePropertyMedia({request,response}:HttpContext){
         try {
@@ -193,6 +194,7 @@ export default class PropertiesController {
         }
     }
 
+
     public async propertyReviewSummary({request,response}:HttpContext){
         try {
             const { page,perPage,property_id } = request.qs()
@@ -320,4 +322,30 @@ export default class PropertiesController {
             return sendError(response,{error:error,message:error.message})
         }
     }
+
+  public async deleteReview({ request, response, auth }: HttpContext) {
+    try {
+      const user = auth.use('api').user
+      const { id } = request.params()
+      const reviewId = await PropertyReview.find(id)
+     
+
+      // Find and delete the review by user and property ID
+      const review = await PropertyReview.query()
+        .where('id', '=', reviewId)
+        .andWhere('property', '=', id)
+        .andWhere('user_id', '=', user?.id)
+        .first()
+
+      if (!review) {
+        return sendError(response, { message: 'Review not found', code: 404 })
+      }
+
+      await review.delete()
+
+      return sendSuccess(response, { message: 'Review deleted successfully' })
+    } catch (error) {
+      return sendError(response, { error: error, message: error.message })
+    }
+  }
 }
