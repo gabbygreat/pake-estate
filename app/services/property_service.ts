@@ -273,7 +273,7 @@ export default class PropertyService{
     }
 
     async updateRatingandReview(propertyID:string){
-        const data = await db.rawQuery("SELECT COUNT(id) as total_review,SUM(rating) as total_rating FROM property_reviews")
+        const data = await db.rawQuery(`SELECT COUNT(id) as total_review,SUM(rating) as total_rating FROM property_reviews WHERE property = '${propertyID}'`)
         const totalRating = data.rows[0].total_rating ?? 0
         const totalReview = data.rows[0].total_review ?? 0
         const averageRating = (totalRating / totalReview).toFixed(2)
