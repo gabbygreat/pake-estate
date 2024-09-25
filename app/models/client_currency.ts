@@ -1,5 +1,8 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
+import type { HasOne } from '@adonisjs/lucid/types/relations'
+import { hasOne } from '@adonisjs/lucid/orm'
+import Currency from './currency.js'
 //Currency supported by the user
 export default class ClientCurrency extends BaseModel {
   @column({ isPrimary: true })
@@ -22,4 +25,7 @@ export default class ClientCurrency extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+  @hasOne(()=>Currency,{foreignKey:'id', localKey:'currency_id'})
+  declare currency:HasOne<typeof Currency>
 }

@@ -5,7 +5,7 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+      table.uuid('id').primary().defaultTo(this.db.rawQuery('uuid_generate_v4()').knexQuery)
       table.uuid('wallet_id').references('id').inTable('wallets').onDelete('CASCADE')
       table.decimal('amount_paid',20,3)
       table.text('description').nullable()
