@@ -81,6 +81,7 @@ export default class MaintenanceController {
             const initiator = auth.use('api').user
             const req = await MaintenanceRequest.find(id)
             if(req && initiator){
+                console.log("owner ",req.owner_id,' AND applicant id ',req.applicant_id," current user ", initiator.id)
                 if(initiator.id !== req.owner_id || initiator.id !== req.applicant_id){
                     return sendError(response,{message:"You are not authorized to perform this operation", code:403})
                 }

@@ -41,6 +41,6 @@ export default class MaintenanceRequest extends BaseModel {
   @hasOne(()=>User,{foreignKey:'id', localKey:'owner_id'})
   declare ownerInfo:HasOne<typeof User>
 
-  @hasOne(()=>User,{foreignKey:'id', localKey:'owner_id'})
+  @hasOne(()=>User,{foreignKey:'id', localKey:'applicant_id'})
   declare applicantInfo:HasOne<typeof User>
 }
