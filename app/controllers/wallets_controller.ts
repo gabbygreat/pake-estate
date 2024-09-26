@@ -7,39 +7,39 @@ import Wallet from '#models/wallet';
 
 export default class WalletsController {
 
-    async fundWallet(){
+    async fundWallet({ request,auth,response}:HttpContext){
         try {
             
         } catch (error) {
-            
+            return sendError(response,{message:"Error funding wallet", code:500})
         }
     }
 
-    async walletBalanceInfo(){
+    async walletBalanceInfo({ request,auth,response}:HttpContext){
         try {
             
         } catch (error) {
-            
+            return sendError(response,{message:"Error fetching wallet balance info", code:500})
         }
     }
 
-    async withdraw(){
+    async withdraw({ request,auth,response}:HttpContext){
         try {
             
         } catch (error) {
-            
+            return sendError(response,{message:"Error withdrawing from wallet", code:500})
         }
     }
 
-    async transfer(){
+    async transfer({ request,auth,response}:HttpContext){
         try {
             
         } catch (error) {
-            
+            return sendError(response,{message:"Error during transfer from wallet", code:500})
         }
     }
 
-    async transactionHistory(){
+    async transactionHistory({ request,auth,response}:HttpContext){
         try {
             
         } catch (error) {
