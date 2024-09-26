@@ -88,7 +88,7 @@ export default class MaintenanceController {
                         } catch{/** */}
                     }
                     await req.delete()
-                    return sendSuccess(response,{message:"Maintenance requst status updated"})
+                    return sendSuccess(response,{message:"Maintenance request deleted"})
                 }else{
                     return sendError(response,{message:"You are not authorized to perform this operation", code:403})
                 }
