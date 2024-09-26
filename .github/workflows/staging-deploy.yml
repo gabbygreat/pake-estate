@@ -19,6 +19,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/commercial/products/PAKEESTATE/pake-estate-backend
+            git stash
             git pull origin staging --no-ff
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
