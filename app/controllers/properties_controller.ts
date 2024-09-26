@@ -349,19 +349,16 @@ export default class PropertiesController {
   public async deleteReview({ request, response, auth }: HttpContext) {
     try {
       const user = auth.use('api').user
+
       const { id } = request.params()
-      const reviewId = await PropertyReview.find(id)
-     
-
-      // Find and delete the review by user and property ID
-      const review = await PropertyReview.query()
-        .where('id', '=', reviewId)
-        .andWhere('property', '=', id)
-        .andWhere('user_id', '=', user?.id)
-        .first()
-
+      const review = await PropertyReview.find(id)
+      
       if (!review) {
         return sendError(response, { message: 'Review not found', code: 404 })
+      }
+
+      if(review?.user_id !== user?.id){
+        return sendError(response,{ message:"You cannot delete this review", code:403})
       }
 
       await review.delete()
