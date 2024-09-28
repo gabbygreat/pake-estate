@@ -22,6 +22,9 @@ export default class WalletPayment extends BaseModel {
   declare currency_id: string
 
   @column()
+  declare payment_status:'completed'|'pending'|'failed'
+
+  @column()
   declare transaction_type:'DEPOSIT'|'WITHDRAWAL'|'TRANSFER'
 
   @column()
@@ -29,6 +32,9 @@ export default class WalletPayment extends BaseModel {
 
   @column()
   declare payment_reference: string
+
+  @column()
+  declare channel_payment_id: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

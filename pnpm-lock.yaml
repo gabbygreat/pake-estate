@@ -62,6 +62,9 @@ importers:
       socket.io:
         specifier: ^4.7.5
         version: 4.7.5
+      stripe:
+        specifier: ^16.12.0
+        version: 16.12.0
     devDependencies:
       '@adonisjs/assembler':
         specifier: ^7.7.0
@@ -2938,6 +2941,10 @@ packages:
   strip-json-comments@3.1.1:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
+
+  stripe@16.12.0:
+    resolution: {integrity: sha512-H7eFVLDxeTNNSn4JTRfL2//LzCbDrMSZ+2q1c7CanVWgK2qIW5TwS+0V7N9KcKZZNpYh/uCqK0PyZh/2UsaAtQ==}
+    engines: {node: '>=12.*'}
 
   strtok3@8.0.1:
     resolution: {integrity: sha512-HNkTAnNWQj2YBzfTtoC5OQyu1QwPsMwiB7VyQmNvQKCrmEDSvFB857Vh97UY9InGLNRAB91sdS1ztifRo/3hdA==}
@@ -6193,6 +6200,11 @@ snapshots:
       min-indent: 1.0.1
 
   strip-json-comments@3.1.1: {}
+
+  stripe@16.12.0:
+    dependencies:
+      '@types/node': 20.14.13
+      qs: 6.12.3
 
   strtok3@8.0.1:
     dependencies:
