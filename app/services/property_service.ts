@@ -9,6 +9,8 @@ import FileUploadService from './fileupload_service.js'
 import PropertyMedia from '#models/property_media'
 import PropertyLegalRequirement from '#models/property_legal_requirement'
 import TenantApplicableFee from '#models/tenant_applicable_fee'
+import Tenant from '#models/tenant'
+import PropertyTenant from '#models/property_tenant'
 
 export type DocumentationStages =
   | 'PROPERTY_INFORMATION'
@@ -343,12 +345,13 @@ export default class PropertyService {
                 await TenantApplicableFee.createMany(fees)
             }
         }else{
+            const tenantInfo = await PropertyTenant.query().select(['property_id']).where('id','=',tenant_id)
             const newFees = await PropertyFee.query().select(['id','amount','name'])
-            .where('property','=',allApplicableFees[0].property_id)
+            .where('property','=',tenantInfo[0].property_id)
             if(newFees.length){
                 const fees:Array<Partial<TenantApplicableFee>> = []
                 newFees.forEach((f)=>{fees.push({
-                    property_id: allApplicableFees[0].property_id,
+                    property_id: tenantInfo[0].property_id,
                     tenant_id,
                     fee_id:f.id,
                     fee_discount:0,
