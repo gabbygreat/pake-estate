@@ -9,7 +9,6 @@ import FileUploadService from './fileupload_service.js'
 import PropertyMedia from '#models/property_media'
 import PropertyLegalRequirement from '#models/property_legal_requirement'
 import TenantApplicableFee from '#models/tenant_applicable_fee'
-import Tenant from '#models/tenant'
 import PropertyTenant from '#models/property_tenant'
 
 export type DocumentationStages =
