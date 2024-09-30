@@ -326,17 +326,12 @@ export default class PropertyService {
     try {
         //Get all fees in applicable fees not existing in applcable fees
         const allApplicableFees = await TenantApplicableFee.query().select(['fee_id','property_id']).whereRaw('tenant_id = ?',[tenant_id])
-        console.log(allApplicableFees)
         const ids:string[] = []
         allApplicableFees.forEach((e)=>ids.push(e.fee_id))
-        //if(allApplicableFees.length){
-            const query = PropertyFee.query().select(['id','amount','name'])
+        if(allApplicableFees.length){
+            const newFees = await PropertyFee.query().select(['id','amount','name'])
             .where('property','=',allApplicableFees[0].property_id)
-            if(ids.length){
-                query.andWhereNotIn('id',ids)
-            }
-            const newFees = await query.orderBy('created_at','asc')
-            console.log(ids)
+            .andWhereNotIn('id',ids)
             if(newFees.length){
                 const fees:Array<Partial<TenantApplicableFee>> = []
                 newFees.forEach((f)=>{fees.push({
@@ -347,7 +342,20 @@ export default class PropertyService {
                 })})
                 await TenantApplicableFee.createMany(fees)
             }
-        //}
+        }else{
+            const newFees = await PropertyFee.query().select(['id','amount','name'])
+            .where('property','=',allApplicableFees[0].property_id)
+            if(newFees.length){
+                const fees:Array<Partial<TenantApplicableFee>> = []
+                newFees.forEach((f)=>{fees.push({
+                    property_id: allApplicableFees[0].property_id,
+                    tenant_id,
+                    fee_id:f.id,
+                    fee_discount:0,
+                })})
+                await TenantApplicableFee.createMany(fees)
+            }
+        }
     } catch (error) {
         
     }
