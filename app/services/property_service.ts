@@ -328,10 +328,11 @@ export default class PropertyService {
         const allApplicableFees = await TenantApplicableFee.query().select(['fee_id','property_id']).whereRaw('tenant_id = ?',[tenant_id])
         const ids:string[] = []
         allApplicableFees.forEach((e)=>ids.push(e.fee_id))
-        if(allApplicableFees.length){
+        //if(allApplicableFees.length){
             const newFees = await PropertyFee.query().select(['id','amount','name'])
             .where('property','=',allApplicableFees[0].property_id)
             .andWhereNotIn('id',ids)
+            console.log(ids)
             if(newFees.length){
                 const fees:Array<Partial<TenantApplicableFee>> = []
                 newFees.forEach((f)=>{fees.push({
@@ -342,7 +343,7 @@ export default class PropertyService {
                 })})
                 await TenantApplicableFee.createMany(fees)
             }
-        }
+        //}
     } catch (error) {
         
     }
