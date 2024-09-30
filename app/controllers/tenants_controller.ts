@@ -18,7 +18,7 @@ export default class TenantsController {
   constructor(
     protected uploadService: FileUploadService,
     protected notificationService: NotificationService,
-    protected proeprtyService: PropertyService
+    protected propertyService: PropertyService
   ) {}
   public async sendApplication({ request, auth, response }: HttpContext) {
     const docs: Array<Partial<TenantDocument>> = []
@@ -442,7 +442,7 @@ export default class TenantsController {
   public async TenantsPaymentStructure({ request, response }: HttpContext) {
     try {
       const { tenant_id } = request.params()
-      await this.proeprtyService.syncNewlyAddedFees(tenant_id)
+      await this.propertyService.syncNewlyAddedFees(tenant_id)
       const mainFee = await PropertyTenant.query()
         .select(['id', 'offering_price', 'discount_price'])
         .where('id', '=', tenant_id)
