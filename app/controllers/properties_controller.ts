@@ -85,7 +85,11 @@ export default class PropertiesController {
                 latitude?:number,
                 longitude?:number,
                 bedrooms?:number,
-                bathrooms?:number
+                bathrooms?:number,
+                maxPrice?:number,
+                minPrice?:number
+                location?:string
+                propertyType?:string
             }
             const input:Filter = request.qs()
             const query = Property.query()
@@ -117,8 +121,29 @@ export default class PropertiesController {
             if(input.bathrooms && input.bedrooms !== null && input.bedrooms !== 'undefined' as any && input.bedrooms !== undefined){
                 query.andWhere('bathrooms','=',input.bathrooms)
             }
+            if(input.minPrice && !isNaN(input.minPrice)){
+                query.andWhere('general_rent_fee','>=',Number(input.minPrice))
+            }
+            if(input.maxPrice && !isNaN(input.maxPrice)){
+                query.andWhere('general_rent_fee','<=',Number(input.maxPrice))
+            }
+            if(input.propertyType && input.propertyType !== 'undefined' && input.propertyType !== undefined){
+                query.andWhere('property_type','=',input.propertyType)
+            }
             if(input.sort){
                 query.orderBy('created_at', input.sort === 'oldest' ? 'asc' : 'desc')
+            }
+            if(input.location){
+                const [city,state,country] = input.location.split(',')
+                if(city){
+                    query.andWhere((q)=>q.whereRaw(`city % ?`,[city]))
+                }
+                if(state){
+                    query.andWhere((q)=>q.whereRaw(`city % ?`,[state]))
+                }
+                if(country){
+                    query.andWhere((q)=>q.whereRaw(`city % ?`,[country]))
+                }
             }
 
             if(input.latitude && input.longitude){
@@ -366,6 +391,22 @@ export default class PropertiesController {
       return sendSuccess(response, { message: 'Review deleted successfully' })
     } catch (error) {
       return sendError(response, { error: error, message: error.message })
+    }
+  }
+
+  public async searchLocationHint({request,response}:HttpContext){
+    try {
+        const {location} = request.params()
+        const locations = await Property.query().select(['country','state','city']).whereRaw(`
+            country % ? OR city % ? OR state % ?`,Array(3).fill(location)).limit(20)
+        const data:string[] = []
+        locations.forEach((e)=>{
+            const d = [e.city || '',e.state || '',e.country || '']
+            data.push(d.join(','))
+        })
+        return sendSuccess(response,{message:"Location search hint", data})
+    } catch (error) {
+        return sendError(response, { error: error, message: error.message })
     }
   }
 }
