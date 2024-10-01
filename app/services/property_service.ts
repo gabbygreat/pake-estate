@@ -200,7 +200,13 @@ export default class PropertyService {
             security_deposit,
           })
           .where('id', '=', id) //Now updated the property fee records
-
+        //Update the tenant's offering price,
+        await PropertyTenant.query({client})
+        .update({
+          offering_price: general_rent_fee
+        })
+        .where('property_id','=',id)
+        
         return sendSuccess(response, { message: 'Financial information updated' })
       })
     } catch (error) {
