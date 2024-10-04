@@ -36,7 +36,8 @@ export default class PropertyService{
                 latitude,
                 property_description,
                 bedrooms,
-                bathrooms
+                bathrooms,
+                furnishing
             } = request.body()
             let property:Property
             if(id){
@@ -64,6 +65,7 @@ export default class PropertyService{
             property.owner_id = property.owner_id ?? owner
             property.bedrooms = bedrooms
             property.bathrooms = bathrooms
+            property.furnishing = furnishing
             await property.save()
             return sendSuccess(response,{message:"Property information updated",data:property})
         } catch (error) {
