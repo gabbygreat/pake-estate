@@ -137,16 +137,16 @@ export default class PropertiesController {
             if(input.sort){
                 query.orderBy('created_at', input.sort === 'oldest' ? 'asc' : 'desc')
             }
-            if(input.location){
-                const [city,state,country] = input.location.split(',')
+            if(input.location && input.location != undefined && input.location !== 'undefined' && input.location !=''){
+                const [city,state,country] = input.location
                 if(city){
                     query.andWhere((q)=>q.whereRaw(`city % ?`,[city]))
                 }
                 if(state){
-                    query.andWhere((q)=>q.whereRaw(`city % ?`,[state]))
+                    query.andWhere((q)=>q.whereRaw(`state % ?`,[state]))
                 }
                 if(country){
-                    query.andWhere((q)=>q.whereRaw(`city % ?`,[country]))
+                    query.andWhere((q)=>q.whereRaw(`country % ?`,[country]))
                 }
             }
 
