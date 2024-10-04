@@ -116,7 +116,11 @@ export default class PropertiesController {
             }
 
             if(input.bedrooms && input.bedrooms !== null && input.bedrooms !== 'undefined' as any && input.bedrooms !== undefined){
-                query.andWhere('bedrooms','=',input.bedrooms)
+                if(input.bedrooms == 5){
+                    query.andWhere('bedrooms','>=',input.bedrooms)
+                }else{
+                    query.andWhere('bedrooms','=',input.bedrooms)
+                }
             }
             if(input.bathrooms && input.bedrooms !== null && input.bedrooms !== 'undefined' as any && input.bedrooms !== undefined){
                 query.andWhere('bathrooms','=',input.bathrooms)
