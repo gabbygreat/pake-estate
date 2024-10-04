@@ -11,12 +11,14 @@ import db from '@adonisjs/lucid/services/db'
 import PropertyFee from '#models/property_fee'
 import TenantApplicableFee from '#models/tenant_applicable_fee'
 import Notification from '#models/notification'
+import PropertyService from '#services/property_service'
 
 @inject()
 export default class TenantsController {
   constructor(
     protected uploadService: FileUploadService,
-    protected notificationService: NotificationService
+    protected notificationService: NotificationService,
+    protected propertyService: PropertyService
   ) {}
   public async sendApplication({ request, auth, response }: HttpContext) {
     const docs: Array<Partial<TenantDocument>> = []
@@ -440,6 +442,7 @@ export default class TenantsController {
   public async TenantsPaymentStructure({ request, response }: HttpContext) {
     try {
       const { tenant_id } = request.params()
+      await this.propertyService.syncNewlyAddedFees(tenant_id)
       const mainFee = await PropertyTenant.query()
         .select(['id', 'offering_price', 'discount_price'])
         .where('id', '=', tenant_id)
