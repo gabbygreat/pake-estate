@@ -19,6 +19,61 @@ export type DocumentationStages =
   | 'MEDIA_INFORMATION'
   | 'LEGAL_INFORMATION'
 
+<<<<<<< HEAD
+export default class PropertyService{
+
+
+    async handlePropertyInformation(request:Request,response:Response,owner:string){
+        try {
+            //Validate the request
+            const {
+                id,
+                property_title,
+                property_type,
+                unit_number,
+                general_capacity,
+                house_number,
+                street_name,
+                city,postal_code,
+                state,country,longitude,
+                latitude,
+                property_description,
+                bedrooms,
+                bathrooms,
+                furnishing
+            } = request.body()
+            let property:Property
+            if(id){
+                property = (await Property.find(id)) as Property
+                if(!property){
+                    return sendError(response,{message:"Property not found", code:404})
+                }
+            }else{
+                property = new Property()
+            }
+            property.property_title = property_title
+            property.property_type = property_type
+            property.unit_number = unit_number
+            property.general_capacity = general_capacity
+            property.house_number = house_number
+            property.street_name = street_name
+            property.city = city
+            property.postal_code = postal_code
+            property.state = state
+            property.country = country
+            property.longitude = longitude
+            property.latitude = latitude
+            property.current_state = 'draft'
+            property.property_description = property_description
+            property.owner_id = property.owner_id ?? owner
+            property.bedrooms = bedrooms
+            property.bathrooms = bathrooms
+            property.furnishing = furnishing
+            await property.save()
+            return sendSuccess(response,{message:"Property information updated",data:property})
+        } catch (error) {
+            throw error
+=======
 export default class PropertyService {
   async handlePropertyInformation(request: Request, response: Response, owner: string) {
     try {
@@ -46,6 +101,7 @@ export default class PropertyService {
         property = (await Property.find(id)) as Property
         if (!property) {
           return sendError(response, { message: 'Property not found', code: 404 })
+>>>>>>> 4b37ca909d7c8d806a93d93553aa1d101d92a3ec
         }
       } else {
         property = new Property()

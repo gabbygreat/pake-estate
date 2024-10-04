@@ -40,7 +40,8 @@ export default class UsersController {
                 const user = await User.create({firstname,lastname,email:lowerCase(email),password,phone_number},{client})
                 //Generate Email verification code
                 const verificationOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification'})
-                await this.emailService.setTemplate<VerificationEmail>('email_verification',
+                console.log(verificationOTP)
+                /*await this.emailService.setTemplate<VerificationEmail>('email_verification',
                     {
                         firstname,
                         verification_url:`${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${verificationOTP}`
@@ -48,8 +49,8 @@ export default class UsersController {
                         subject:'Email Verification',
                         to: email,
                         from: 'Pake Estate Management'
-                    })
-                return sendSuccess(response,{message:'Account created successfuly',data:{...user.$attributes,password:'****'}})
+                    })*/
+                return sendSuccess(response,{message:'Account created successfully',data:{...user.$attributes,password:'****'}})
             })
         } catch (error) {
             let message:string = ''
@@ -177,14 +178,14 @@ export default class UsersController {
                     user.email_verified = true
                     user.email_verified_at = new Date()
                     await user.save()
-                    await this.emailService.setTemplate<WelcomeEmail>('welcome_email',
+                    /*await this.emailService.setTemplate<WelcomeEmail>('welcome_email',
                         {
                             firstname:user.firstname!,
                         }).sendMail({
                             subject:'Welcome Onboard',
                             to: email,
                             from: 'Pake Estate Management'
-                        })
+                        })*/
                     return sendSuccess(response,{message:"Email Verification successful"})
                 }else{
                     return sendError(response,{message:'Invalid or expired token', code:400})

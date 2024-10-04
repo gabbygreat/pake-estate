@@ -378,8 +378,8 @@ export default class PropertiesController {
   public async deleteReview({ request, response, auth }: HttpContext) {
     try {
       const user = auth.use('api').user
-
       const { id } = request.params()
+
       const review = await PropertyReview.find(id)
       
       if (!review) {
