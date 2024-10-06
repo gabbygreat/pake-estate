@@ -4,7 +4,7 @@ import { sendError, sendSuccess } from "../utils.js";
 import Currency from '#models/currency';
 import ClientCurrency from '#models/client_currency';
 import Wallet from '#models/wallet';
-import { cuid } from '@adonisjs/core/helpers';
+import db from '@adonisjs/lucid/services/db';
 import WalletService, { WebHookAccRef, WebHookObject } from '#services/wallet_service';
 import { inject } from '@adonisjs/core';
 
@@ -52,35 +52,59 @@ export default class WalletsController {
 
     async walletBalanceInfo({ request,auth,response}:HttpContext){
         try {
-            
+            const { currencyId } = request.params()
+            const user = auth.use('api').user!
+            const walletBalance = await Wallet.query()
+            .select(['id','balance']).where((q)=>q.whereRaw(`currency_id = ? AND user_id = ?`,[currencyId,user.id]))
+            const query = await db.rawQuery(`
+                SELECT
+                    (SELECT SUM(amount_paid)
+                    FROM wallet_payments
+                    WHERE currency_id = '${currencyId}'
+                    AND payment_status = 'completed'
+                    AND wallet_id = '${walletBalance[0].id}'
+                    AND transaction_type = 'DEPOSIT') AS total_received,
+
+                    (SELECT SUM(amount_paid)
+                    FROM wallet_payments
+                    WHERE currency_id = '${currencyId}'
+                    AND payment_status = 'completed'
+                    AND wallet_id = '${walletBalance[0].id}'
+                    AND (transaction_type = 'WITHDRAW' OR transaction_type='TRANSFER')) AS total_sent;
+
+        `)
+        const balances = query.rows[0]
+        balances.total_received = Number(balances.total_received)
+        balances.total_sent = Number(balances.total_sent)
+        return sendSuccess(response,{message:"Wallet Balance", data:balances})
         } catch (error) {
             return sendError(response,{message:"Error fetching wallet balance info", code:500})
         }
     }
 
-    async withdraw({ request,auth,response}:HttpContext){
-        try {
+    // async withdraw({ request,auth,response}:HttpContext){
+    //     try {
             
-        } catch (error) {
-            return sendError(response,{message:"Error withdrawing from wallet", code:500})
-        }
-    }
+    //     } catch (error) {
+    //         return sendError(response,{message:"Error withdrawing from wallet", code:500})
+    //     }
+    // }
 
-    async transfer({ request,auth,response}:HttpContext){
-        try {
+    // async transfer({ request,auth,response}:HttpContext){
+    //     try {
             
-        } catch (error) {
-            return sendError(response,{message:"Error during transfer from wallet", code:500})
-        }
-    }
+    //     } catch (error) {
+    //         return sendError(response,{message:"Error during transfer from wallet", code:500})
+    //     }
+    // }
 
-    async transactionHistory({ request,auth,response}:HttpContext){
-        try {
+    // async transactionHistory({ request,auth,response}:HttpContext){
+    //     try {
             
-        } catch (error) {
+    //     } catch (error) {
             
-        }
-    }
+    //     }
+    // }
 
     async supportedCurrency({ auth,response }:HttpContext){
         try {

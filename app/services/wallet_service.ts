@@ -30,8 +30,8 @@ export default class WalletService{
             metadata: { reference: reference },
             customer_email: email,
             mode: 'payment',
-            success_url: `${env.get('STRIPE_RESPONSE_URL')}/payment-success`,
-            cancel_url: `${env.get('STRIPE_RESPONSE_URL')}/payment-error`,
+            success_url: `${env.get('STRIPE_RESPONSE_URL')}payment-success`,
+            cancel_url: `${env.get('STRIPE_RESPONSE_URL')}payment-error`,
           })
       
           return {

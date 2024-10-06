@@ -1,7 +1,7 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'wallets'
+  protected tableName = 'wallet_payments'
 
   async up() {
     this.schema.alterTable(this.tableName, (table) => {
