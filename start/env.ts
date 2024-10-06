@@ -35,6 +35,9 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   WEBSITE_URL: Env.schema.string(),
   WEBSITE_API_URL: Env.schema.string(),
+  STRIPE_SECRET_KEY: Env.schema.string(),
+  STRIPE_RESPONSE_URL: Env.schema.string(),
+  STRIPE_ENDPOINT_SECRET: Env.schema.string(),
   /*
   |----------------------------------------------------------
   | Variables for configuring the mail package
@@ -44,4 +47,5 @@ export default await Env.create(new URL('../', import.meta.url), {
   SMTP_PORT: Env.schema.string(),
   SMTP_USERNAME: Env.schema.string(),
   SMTP_PASSWORD: Env.schema.string()
+
 })

@@ -71,7 +71,9 @@
     "pg": "^8.12.0",
     "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
-    "socket.io": "^4.8.0"
+    "socket.io": "^4.8.0",
+    "stripe": "^16.12.0"
+
   },
   "hotHook": {
     "boundaries": [

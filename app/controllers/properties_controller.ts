@@ -10,6 +10,7 @@ import { inject } from '@adonisjs/core'
 import PropertyLegalRequirement from '#models/property_legal_requirement'
 import PropertyTenant from '#models/property_tenant'
 
+
 @inject()
 export default class PropertiesController {
     constructor(
