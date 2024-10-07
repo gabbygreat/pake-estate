@@ -14,6 +14,8 @@ export default class extends BaseSchema {
       table.decimal('total_amount',20,3).defaultTo(0)
       table.enum('status',['unpaid', 'paid', 'overdue']).defaultTo('unpaid')
       table.timestamp('payment_date').nullable()
+      table.timestamp('next_payment_date').nullable()
+      table.uuid('currency_id').references('id').inTable('currencies').onDelete('CASCADE')
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })

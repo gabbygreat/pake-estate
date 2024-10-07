@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column,hasMany } from '@adonisjs/lucid/orm'
-import type { HasMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column,hasMany,hasOne } from '@adonisjs/lucid/orm'
+import type { HasMany , HasOne} from '@adonisjs/lucid/types/relations'
 import RentalInvoicePayment from './rental_invoice_payment.js'
+import Property from './property.js'
 export default class RentalInvoice extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
@@ -30,12 +31,21 @@ export default class RentalInvoice extends BaseModel {
   @column()
   declare payment_date: Date
 
+  @column()
+  declare next_payment_date: Date
+
+  @column()
+  declare currency_id: string
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @hasMany(()=>RentalInvoicePayment,{foreignKey:'invoice_id', localKey:'id'})
+  @hasMany(()=>RentalInvoicePayment,{foreignKey:'id', localKey:'invoice_id'})
   declare payments:HasMany<typeof RentalInvoicePayment>
+
+  @hasOne(()=>Property,{foreignKey:'id', localKey:'property_id'})
+  declare property:HasOne<typeof Property>
 }

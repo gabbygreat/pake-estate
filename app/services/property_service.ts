@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 import Property from '#models/property'
 import { Request, Response } from '@adonisjs/core/http'
 import { sendError, sendSuccess } from '../utils.js'
@@ -34,6 +35,7 @@ export default class PropertyService {
         city,
         postal_code,
         state,
+        listing_type,
         country,
         longitude,
         latitude,
@@ -67,6 +69,7 @@ export default class PropertyService {
       property.owner_id = property.owner_id ?? owner
       property.bedrooms = bedrooms
       property.bathrooms = bathrooms
+      property.listing_type = listing_type
       await property.save()
       return sendSuccess(response, { message: 'Property information updated', data: property })
     } catch (error) {
@@ -77,8 +80,8 @@ export default class PropertyService {
   async handlePropertyFeature(request: Request, response: Response) {
     try {
       //Validations
-      let PAmenities: string[] = request.input('amenities')
-      let PUtilities: string[] = request.input('utilities')
+      const PAmenities: string[] = request.input('amenities')
+      const PUtilities: string[] = request.input('utilities')
       const { furnishing, pet_policy, maintainance_information, id } = request.body()
       await db.transaction(async (client) => {
         if (PAmenities.length) {
@@ -157,7 +160,7 @@ export default class PropertyService {
       const additionalFees: Fee = request.input('additional_fees')
       const toAdd: Fee = []
       const toDelete: string[] = []
-      const { general_rent_fee, general_lease_time, general_renewal_cycle, security_deposit } =
+      const { general_rent_fee, general_lease_time, general_renewal_cycle, security_deposit, currency_id } =
         request.body()
       if (!/yearly|monthly|daily|weekly|hourly/.test(general_renewal_cycle)) {
         return sendError(response, { message: 'Invalid billing cycle option', code: 400 })
@@ -168,7 +171,7 @@ export default class PropertyService {
           .where('property', '=', id)
         if (prevFees.length) {
           //Go through DB list to update or mark existing records for deletion
-          for (let fee of prevFees) {
+          for (const fee of prevFees) {
             const feeIndex = additionalFees.findIndex((e) => e.id === fee.id)
             if (feeIndex < 0) {
               toDelete.push(fee.id)
@@ -198,6 +201,7 @@ export default class PropertyService {
             general_lease_time,
             general_renewal_cycle,
             security_deposit,
+            currency_id
           })
           .where('id', '=', id) //Now updated the property fee records
         //Update the tenant's offering price,

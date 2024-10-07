@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { HttpContext } from '@adonisjs/core/http'
 import FileUploadService from '#services/fileupload_service'
 import PropertyService, { DocumentationStages } from '#services/property_service'

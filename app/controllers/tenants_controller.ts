@@ -12,13 +12,15 @@ import PropertyFee from '#models/property_fee'
 import TenantApplicableFee from '#models/tenant_applicable_fee'
 import Notification from '#models/notification'
 import PropertyService from '#services/property_service'
+import RentalInvoiceService from '#services/rentalinvoice_service'
 
 @inject()
 export default class TenantsController {
   constructor(
     protected uploadService: FileUploadService,
     protected notificationService: NotificationService,
-    protected propertyService: PropertyService
+    protected propertyService: PropertyService,
+    protected rentalInvoiceService: RentalInvoiceService
   ) {}
   public async sendApplication({ request, auth, response }: HttpContext) {
     const docs: Array<Partial<TenantDocument>> = []
@@ -282,6 +284,7 @@ export default class TenantsController {
           })
           record.approval_date = new Date()
           //Generate RENTAL INVOICE FOR THE USER
+          await this.rentalInvoiceService.generateInvoice(tenant_id)
         }
         if (status === 'rejected') {
           record.rejection_reason = reason
@@ -443,39 +446,7 @@ export default class TenantsController {
     try {
       const { tenant_id } = request.params()
       await this.propertyService.syncNewlyAddedFees(tenant_id)
-      const mainFee = await PropertyTenant.query()
-        .select(['id', 'offering_price', 'discount_price'])
-        .where('id', '=', tenant_id)
-        .preload('applicableFees', (fees) => {
-          fees
-            .select(['id', 'fee_discount', 'fee_id', 'property_id'])
-            .preload('feeInfo', (info) => {
-              info.select(['amount', 'name'])
-            })
-        })
-      const fees: Array<{
-        slug: string
-        name: string
-        amount: number
-        discount: number
-        id: string | null
-      }> = []
-      fees[0] = {
-        slug: 'RENTAL_FEE',
-        name: 'rent fee',
-        amount: mainFee[0].offering_price,
-        discount: mainFee[0].discount_price,
-        id: null,
-      }
-      mainFee[0].applicableFees.forEach((e) => {
-        fees.push({
-          slug: 'OTHERS',
-          name: e.feeInfo.name,
-          amount: e.feeInfo.amount,
-          discount: e.fee_discount,
-          id: e.id,
-        })
-      })
+      const {fees} = await this.rentalInvoiceService.invoiceFees(tenant_id)
       return sendSuccess(response,{message:"Payment structure", data:fees})
     } catch (error) {
       return sendError(response, { message: 'Cannot load payment structure', code: 500 })

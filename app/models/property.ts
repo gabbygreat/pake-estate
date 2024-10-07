@@ -130,6 +130,9 @@ export default class Property extends BaseModel {
   declare owner_contact_details: string
 
   @column()
+  declare listing_type:'sale'|'rent'
+
+  @column()
   declare manager_contact_details: string
 
   @column.dateTime({ autoCreate: true })
