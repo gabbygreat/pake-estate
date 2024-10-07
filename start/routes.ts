@@ -15,6 +15,7 @@ import './routes/tenant-route.js'
 import './routes/maintenance_routes.js'
 import './routes/chat-messages-routes.js'
 import './routes/wallet-routes.js'
+import './routes/currencies-routes.js'
 
 router.get('/', async () => {
   return {

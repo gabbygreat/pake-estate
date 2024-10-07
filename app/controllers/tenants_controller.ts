@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unexpected-multiline */
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import type { HttpContext } from '@adonisjs/core/http'
 import { createTenantValidator } from '#validators/tenant_application'
 import FileUploadService from '#services/fileupload_service'
@@ -448,7 +451,7 @@ export default class TenantsController {
       await this.propertyService.syncNewlyAddedFees(tenant_id)
       const {fees} = await this.rentalInvoiceService.invoiceFees(tenant_id)
       return sendSuccess(response,{message:"Payment structure", data:fees})
-    } catch (error) {
+    } catch {
       return sendError(response, { message: 'Cannot load payment structure', code: 500 })
     }
   }

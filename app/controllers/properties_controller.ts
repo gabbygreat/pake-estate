@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { HttpContext } from '@adonisjs/core/http'
 import FileUploadService from '#services/fileupload_service'
@@ -53,7 +54,7 @@ export default class PropertiesController {
             if(item){
                 try {
                     await this.uploadService.removeFile(item.media_url,"properties")
-                } catch{}
+                } catch{/** */}
                 await item.delete()
                 return sendSuccess(response,{message:"Media item removed"})
             }else{
@@ -231,7 +232,7 @@ export default class PropertiesController {
     public async propertyReviewSummary({request,response}:HttpContext){
         try {
             const { page,perPage,property_id } = request.qs()
-            let property = await Property.find(property_id)
+            const property = await Property.find(property_id)
             const ratings = [1,2,3,4,5]
             const frequency = Array(ratings.length).fill(0)
             for(let i=0; i < ratings.length; i++){

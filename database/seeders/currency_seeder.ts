@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import Currency from '#models/currency'
 import { currencies } from '#services/currency_service'

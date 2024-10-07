@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { HttpContext } from '@adonisjs/core/http'
 import { sendError, sendSuccess } from '../utils.js'
 import Property from '#models/property'

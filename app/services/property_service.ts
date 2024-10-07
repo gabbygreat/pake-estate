@@ -244,7 +244,7 @@ export default class PropertyService {
       const tenant_screening_criteria_doc = request.files('tenant_screening_criteria_doc')
       const legal_disclosure_doc = request.files('legal_disclosure_doc')
 
-      let files = { tenant_screening_criteria_doc: '', legal_disclosure_doc: '' }
+      const files = { tenant_screening_criteria_doc: '', legal_disclosure_doc: '' }
       //Upload files
       const uploadService = new FileUploadService()
       if (tenant_screening_criteria_doc.length) {
@@ -281,7 +281,7 @@ export default class PropertyService {
         if (doc.document_url && files['tenant_screening_criteria_doc'].length) {
           try {
             await uploadService.removeFile(doc.document_url, 'legal-documents')
-          } catch {}
+          } catch {/** */}
         }
         doc.document_url = files['tenant_screening_criteria_doc'] || doc.document_url
         doc.property = id
@@ -303,7 +303,7 @@ export default class PropertyService {
         if (doc.document_url && files['legal_disclosure_doc']) {
           try {
             await uploadService.removeFile(doc.document_url, 'legal-documents')
-          } catch {}
+          } catch {/** */}
         }
         doc.document_url = files['legal_disclosure_doc'] || doc.document_url
         doc.property = id
@@ -368,8 +368,8 @@ export default class PropertyService {
                 await TenantApplicableFee.createMany(fees)
             }
         }
-    } catch (error) {
-        
+    } catch {
+        /** */
     }
   }
 }
