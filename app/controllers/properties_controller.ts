@@ -169,6 +169,7 @@ export default class PropertiesController {
             const data = await query.paginate(input.page ?? 1, input.perPage ?? 20)
             return sendSuccess(response,{message:"Property listing", data})
         } catch (error) {
+            console.log(error)
             return sendError(response,{message:error.message,code:500})
         }
     }
