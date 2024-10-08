@@ -414,3 +414,15 @@ export default class PropertiesController {
     }
   }
 }
+    /**
+     * async saveProperty
+{request, response}:HttpContext     */
+    public async saveProperty({request,response}:HttpContext){
+        try {
+            const user = auth.use('api').user
+
+        } catch (error) {
+            
+        }
+        
+    }
