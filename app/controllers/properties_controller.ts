@@ -11,7 +11,6 @@ import { createReviewValidator } from '#validators/review'
 import { inject } from '@adonisjs/core'
 import PropertyLegalRequirement from '#models/property_legal_requirement'
 import PropertyTenant from '#models/property_tenant'
-import { request } from 'http'
 import { createPropertyValidator } from '#validators/property'
 
 
