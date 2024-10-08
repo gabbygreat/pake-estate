@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { HttpContext } from '@adonisjs/core/http'
 import FileUploadService from '#services/fileupload_service'
 import PropertyService, { DocumentationStages } from '#services/property_service'
@@ -11,6 +13,7 @@ import PropertyLegalRequirement from '#models/property_legal_requirement'
 import PropertyTenant from '#models/property_tenant'
 import { request } from 'http'
 import { createPropertyValidator } from '#validators/property'
+
 
 @inject()
 export default class PropertiesController {
@@ -53,7 +56,7 @@ export default class PropertiesController {
             if(item){
                 try {
                     await this.uploadService.removeFile(item.media_url,"properties")
-                } catch{}
+                } catch{/** */}
                 await item.delete()
                 return sendSuccess(response,{message:"Media item removed"})
             }else{
@@ -99,6 +102,9 @@ export default class PropertiesController {
             .where('property_title','!=',"")
             .preload('mediaItems',(media)=>{
                 media.select(['id','media_url','media_type'])
+            })
+            .preload('currency',(currency)=>{
+                currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
             })
             if(input.search){
                 query.andWhere((q)=>{
@@ -191,6 +197,9 @@ export default class PropertiesController {
             .preload('utilities',(utility)=>{
                 utility.select('*')
             })
+            .preload('currency',(currency)=>{
+                currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+            })
             .preload('mediaItems',(media)=>{
                 media.select(['id',"media_url","media_type"])
             }).where('id','=',id)
@@ -231,7 +240,7 @@ export default class PropertiesController {
     public async propertyReviewSummary({request,response}:HttpContext){
         try {
             const { page,perPage,property_id } = request.qs()
-            let property = await Property.find(property_id)
+            const property = await Property.find(property_id)
             const ratings = [1,2,3,4,5]
             const frequency = Array(ratings.length).fill(0)
             for(let i=0; i < ratings.length; i++){

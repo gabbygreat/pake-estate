@@ -1,10 +1,10 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
-import type { HasOne } from '@adonisjs/lucid/types/relations'
-import { hasOne } from '@adonisjs/lucid/orm'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { belongsTo } from '@adonisjs/lucid/orm'
+import User from './user.js'
 import Currency from './currency.js'
-//Currency supported by the user
-export default class ClientCurrency extends BaseModel {
+export default class Wallet extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
@@ -15,10 +15,7 @@ export default class ClientCurrency extends BaseModel {
   declare user_id: string
 
   @column()
-  declare default_currency: boolean
-
-  @column()
-  declare supported:boolean
+  declare balance: number
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -26,6 +23,9 @@ export default class ClientCurrency extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @hasOne(()=>Currency,{foreignKey:'id', localKey:'currency_id'})
-  declare currency:HasOne<typeof Currency>
+  @belongsTo(()=>User,{foreignKey:'user_id', localKey:'id'})
+  declare user:BelongsTo<typeof User>
+
+  @belongsTo(()=>Currency,{foreignKey:'currency_id', localKey:'id'})
+  declare currency:BelongsTo<typeof Currency>
 }

@@ -14,6 +14,7 @@ import PropertySection from './property_section.js'
 import PropertyTenant from './property_tenant.js'
 import PropertyUtility from './property_utility.js'
 import PropertyReview from './property_review.js'
+import Currency from './currency.js'
 export default class Property extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
@@ -130,7 +131,13 @@ export default class Property extends BaseModel {
   declare owner_contact_details: string
 
   @column()
+  declare listing_type:'sale'|'rent'
+
+  @column()
   declare manager_contact_details: string
+
+  @column()
+  declare currency_id: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -167,4 +174,7 @@ export default class Property extends BaseModel {
 
   @hasMany(()=>PropertyReview,{foreignKey:'property', localKey:'id'})
   declare reviews:HasMany<typeof PropertyReview>
+
+  @hasOne(()=>Currency,{foreignKey:'id', localKey:'currency_id'})
+  declare currency:HasOne<typeof Currency>
 }

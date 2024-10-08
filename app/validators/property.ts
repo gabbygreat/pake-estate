@@ -1,3 +1,4 @@
+//@ts-nocheck
 import vine, { SimpleMessagesProvider } from '@vinejs/vine'
 
 export const createPropertyValidator = vine.compile(

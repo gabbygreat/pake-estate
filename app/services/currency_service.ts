@@ -32,7 +32,7 @@ export default class CurrencyService{
 
 }
 
-const currencies = {
+export const currencies = {
 	"USD": {
 		"symbol": "$",
 		"name": "US Dollar",
