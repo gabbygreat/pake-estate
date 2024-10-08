@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 import Property from '#models/property'
 import { Request, Response } from '@adonisjs/core/http'
 import { sendError, sendSuccess } from '../utils.js'
