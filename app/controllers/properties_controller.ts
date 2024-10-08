@@ -11,6 +11,8 @@ import { createReviewValidator } from '#validators/review'
 import { inject } from '@adonisjs/core'
 import PropertyLegalRequirement from '#models/property_legal_requirement'
 import PropertyTenant from '#models/property_tenant'
+import { request } from 'http'
+import { createPropertyValidator } from '#validators/property'
 
 
 @inject()
@@ -423,4 +425,29 @@ export default class PropertiesController {
         return sendError(response, { error: error, message: error.message })
     }
   }
+  public async saveProperty({request, response, auth}:HttpContext){
+    try{
+        const user = auth.use('api').user
+        if(!user){
+            return sendError(response, { message: 'Unauthorized', code: 401 })
+        }
+        const property = Property.create({owner_id: user.id})
+        await request.validateUsing(createPropertyValidator)
+        return sendSuccess(response, {
+            message: 'Property saved successfully',
+            data: property,
+          })
+    }catch (error) {
+        // Handle validation errors or other errors
+        return sendError(response, {
+          message: 'Error saving property',
+          error: error.messages || error.message,
+          code: 400,
+        })
+      }
+  }
 }
+
+
+   
+    

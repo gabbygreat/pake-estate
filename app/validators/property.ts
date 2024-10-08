@@ -42,4 +42,16 @@ export const createPropertyValidator = vine.compile(
         manager_contact_details: vine.string().nullable(),
     })
 )
+createPropertyValidator.messagesProvider = new SimpleMessagesProvider({
+    'required': 'The {{ field }} field is required',
+    'string': 'The value of {{ field }} field must be a string',
+    'email': 'Please provide a valid email address',
+    "current_state.enum":"Invalid current state selection",
+    "furnishing.enum":"Invalid furnished state selected",
+    "property_type.enum":"Invalid Property type selected",
+    "general_renewal_cycle.enum":"Invalid cycle selected",
+    'number': 'The value of {{ field}} field must be a number',
+    'boolean': 'The value of {{field}} field must be true or false'
+})
+
 
