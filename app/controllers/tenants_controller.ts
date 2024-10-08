@@ -209,7 +209,12 @@ export default class TenantsController {
       const filter: Filter = request.qs() as Filter
       const query = PropertyTenant.query()
         .select('*')
-        .preload('propertyInfo', (property) => property.select(['id', 'property_title']))
+        .preload('propertyInfo', (property) => {
+          property.select(['id', 'property_title'])
+          .preload('currency',(currency)=>{
+            currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+        })
+        })
         .preload('applicantInfo', (applicant) =>
           applicant.select(['id', 'firstname', 'lastname', 'email'])
         )
@@ -310,7 +315,12 @@ export default class TenantsController {
       const { tenant_id } = request.params()
       const result = await PropertyTenant.query()
         .select('*')
-        .preload('propertyInfo', (property) => property.select(['id', 'property_title']))
+        .preload('propertyInfo', (property) => {
+          property.select(['id', 'property_title'])
+          .preload('currency',(currency)=>{
+            currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+        })
+         })
         .preload('applicantInfo', (applicant) =>
           applicant.select(['id', 'firstname', 'lastname', 'email'])
         )
@@ -426,6 +436,9 @@ export default class TenantsController {
         })
         .preload('propertyInfo', (property) => {
           property.select(['property_title'])
+          .preload('currency',(currency)=>{
+            currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+        })
         })
       const data: Array<{ property_id: string; property_title: string }> = []
 

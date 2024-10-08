@@ -101,6 +101,9 @@ export default class PropertiesController {
             .preload('mediaItems',(media)=>{
                 media.select(['id','media_url','media_type'])
             })
+            .preload('currency',(currency)=>{
+                currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+            })
             if(input.search){
                 query.andWhere((q)=>{
                     q.whereRaw('property_title % ? OR property_description % ?',Array(2).fill(input.search))
@@ -191,6 +194,9 @@ export default class PropertiesController {
             })
             .preload('utilities',(utility)=>{
                 utility.select('*')
+            })
+            .preload('currency',(currency)=>{
+                currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
             })
             .preload('mediaItems',(media)=>{
                 media.select(['id',"media_url","media_type"])

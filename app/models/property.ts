@@ -136,6 +136,9 @@ export default class Property extends BaseModel {
   @column()
   declare manager_contact_details: string
 
+  @column()
+  declare currency_id: string
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
