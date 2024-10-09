@@ -94,6 +94,7 @@ export default class PropertiesController {
                 minPrice?:number
                 location?:string
                 propertyType?:string
+                listingType?:'sale'|'rent'
             }
             const input:Filter = request.qs()
             const query = Property.query()
@@ -121,7 +122,9 @@ export default class PropertiesController {
             if(input.forReview && (input.forReview === true || input.forReview === 'true')){
                 query.orderBy('total_reviews', 'desc')
             }
-
+            if(input.listingType){
+                query.andWhere('listing_type','=',input.listingType)
+            }
             if(input.bedrooms && input.bedrooms !== null && input.bedrooms !== 'undefined' as any && input.bedrooms !== undefined){
                 if(input.bedrooms == 5){
                     query.andWhere('bedrooms','>=',input.bedrooms)
