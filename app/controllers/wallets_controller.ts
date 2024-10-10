@@ -80,7 +80,7 @@ export default class WalletsController {
         const balances = query.rows[0]
         balances.total_received = Number(balances.total_received)
         balances.total_sent = Number(balances.total_sent)
-        return sendSuccess(response,{message:"Wallet Balance", data:{balances,walletBalance}})
+        return sendSuccess(response,{message:"Wallet Balance", data:{balances,balance:walletBalance[0]}})
         } catch (error) {
             return sendError(response,{message:"Error fetching wallet balance info", code:500})
         }
