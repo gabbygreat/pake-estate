@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable prefer-const */
+/* eslint-disable no-fallthrough */
+/* eslint-disable no-case-declarations */
 import type { HttpContext } from '@adonisjs/core/http'
 import emitter from '@adonisjs/core/services/emitter';
 import { sendError, sendSuccess } from "../utils.js";
@@ -76,7 +80,7 @@ export default class WalletsController {
         const balances = query.rows[0]
         balances.total_received = Number(balances.total_received)
         balances.total_sent = Number(balances.total_sent)
-        return sendSuccess(response,{message:"Wallet Balance", data:balances})
+        return sendSuccess(response,{message:"Wallet Balance", data:{balances,walletBalance}})
         } catch (error) {
             return sendError(response,{message:"Error fetching wallet balance info", code:500})
         }
