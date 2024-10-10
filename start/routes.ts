@@ -16,6 +16,7 @@ import './routes/maintenance_routes.js'
 import './routes/chat-messages-routes.js'
 import './routes/wallet-routes.js'
 import './routes/currencies-routes.js'
+import './routes/rental-invoices-routes.js'
 
 router.get('/', async () => {
   return {
