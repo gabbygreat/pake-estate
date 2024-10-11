@@ -1,45 +1,15 @@
-//@ts-nocheck
 import vine, { SimpleMessagesProvider } from '@vinejs/vine'
 
-export const createPropertyValidator = vine.compile(
+export const savePropertyValidator = vine.compile(
     vine.object({
-        owner_id: vine.string(),
-        current_state: vine.enum(['draft', 'published'] as const),
-        flagged: vine.string().nullable(),
-        hidden: vine.boolean().nullable(),
-        total_reviews: vine.number().nullable(),
-        total_rating: vine.number().nullable(),
-        total_views: vine.number().nullable(),
-        total_purchases: vine.number().nullable(),
-        ask_price: vine.number(),
-        show_pricing: vine.number().nullable(),
-        property_title: vine.string(),
-        property_type: vine.enum(['Apartment', 'Event Center', 'Store'] as const),
-        property_description: vine.string().nullable(),
-        unit_number: vine.string().nullable(),
-        general_capacity: vine.number().nullable(),
-        landmarks: vine.string().nullable(),
-        independent_spaces: vine.string().nullable(),
-        bedrooms: vine.number().nullable(),
-        bathrooms: vine.number().nullable(),
-        house_number: vine.string().nullable(),
-        street_name: vine.string(),
-        city: vine.string(),
-        postal_code: vine.string().nullable(),
-        state: vine.string(),
-        country: vine.string(),
-        longitude: vine.string(),
-        latitude: vine.string(),
-        available: vine.boolean().nullable(),
-        pet_policy: vine.string().nullable(),
-        maintainance_information: vine.string().nullable(),
-        furnishing: vine.enum(['un-furnished', 'furnished', 'semi-furnished', 'fully-furnished'] as const).nullable(),
-        general_rent_fee: vine.number().nullable(),
-        general_lease_time: vine.string().nullable(),
-        general_renewal_cycle: vine.enum(['yearly', 'monthly', 'daily', 'weekly', 'hourly'] as const).nullable(),
-        security_deposit: vine.number().nullable(),
-        owner_contact_details: vine.string().nullable(),
-        manager_contact_details: vine.string().nullable(),
+        property_id: vine.number(),
+        
     })
 )
+savePropertyValidator.messagesProvider = new SimpleMessagesProvider({
+    'required': 'The {{ field }} field is required',
+    'string': 'The value of {{ field }} field must be a string',
+    'number': 'The value of {{ field}} field must be a number',
+})
+
 

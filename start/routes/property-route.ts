@@ -17,6 +17,7 @@ router.group(()=>{
     router.get('hide-property/:id',[PropertyController,'hideProperty']).use(middleware.auth({guards:['api']}))
     router.delete('remove/:id',[PropertyController,'deleteProperty']).use(middleware.auth({guards:['api']}))
     router.delete('delete-review/:id',[PropertyController,'deleteReview']).use(middleware.auth({guards:['api']}))
+    router.post('save-property',[PropertyController,'saveProperty']).use(middleware.auth({guards:['api']}))
     router.get('/location-search-hint/:location',[PropertyController,'searchLocationHint'])
     
 }).prefix('/property')
