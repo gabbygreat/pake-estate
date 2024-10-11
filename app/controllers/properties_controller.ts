@@ -444,7 +444,6 @@ export default class PropertiesController {
           const existingSave = await SavedProperty.query()
           .where("user_id","=",user.id)
           .andWhere ('property_id',"=", property_id)
-         
           if (existingSave[0]) {
             return sendError(response, { message: 'Property already saved', code: 400 })
           }
