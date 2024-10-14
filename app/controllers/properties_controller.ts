@@ -96,7 +96,8 @@ export default class PropertiesController {
                 minPrice?:number
                 location?:string
                 propertyType?:string
-                listingType?:'sale'|'rent'
+                listingType?:'sale'|'rent',
+                currency?:string
             }
             const input:Filter = request.qs()
             const query = Property.query()
@@ -162,7 +163,9 @@ export default class PropertiesController {
                     query.andWhere((q)=>q.whereRaw(`country % ?`,[country]))
                 }
             }
-
+            if(input.currency && input.currency !== undefined && input.currency !== 'undefined'){
+                query.andWhere('currency_id','=',input.currency)
+            }
             if(input.latitude && input.longitude){
                 const {maxLat,maxLng,minLat,minLng} = calculateBoundingBox(input.latitude,input.longitude,5)//5KM AREA
                 const locationQuery = gisQuery({
