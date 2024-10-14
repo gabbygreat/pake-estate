@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import RentalInvoice from '#models/rental_invoice'
 import type { HttpContext } from '@adonisjs/core/http'
 import { sendError, sendSuccess } from '../utils.js'
 import RentalInvoiceService from '#services/rentalinvoice_service'
 // import db from '@adonisjs/lucid/services/db'
+// import Wallet from '#models/wallet'
 import { inject } from '@adonisjs/core'
 
 @inject()
@@ -54,7 +56,8 @@ export default class RentalInvoicesController {
                 message:"Rental Invoices",
                 data: invoices
             })
-        } catch {
+        } catch(e) {
+            console.log(e)
             return sendError(response,{message:"Rental Invoices", code: 500})
         }
     }
@@ -83,9 +86,12 @@ export default class RentalInvoicesController {
     //         await db.transaction(async(client)=>{
     //             const invoice = await RentalInvoice.find(id,{client})
     //             //Check wallet balance
-    //             const balance = 
+    //             //@ts-ignore
+    //             const balance = await Wallet.query().select('*').where((q)=>q.whereRaw(`user_id = ? AND currency_id = ?`,[user?.id,invoice?.currency_id!]))
+    //             console.log(balance)
     //         })
     //     } catch (error) {
+    //         console.log(error)
     //         return sendError(response,{message:"Rental Invoices", code: 500}) 
     //     }
     // }
