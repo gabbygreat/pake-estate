@@ -197,16 +197,13 @@ export default class PropertiesController {
         }
     }
 
-    public async propertyInfo({request,response}:HttpContext){
+    public async propertyInfo({request,auth,response}:HttpContext){
         try {
             const {id} = request.params()
             const data = await Property.query().select('*')
             .preload('amenities',(am)=>{
                 am.select(['id','name'])
             })
-            // .preload('documents',(dc)=>{
-            //     dc.select('*')
-            // })
             .preload('fees',(fee)=>{
                 fee.select(['id','name','amount'])
             })
@@ -226,7 +223,20 @@ export default class PropertiesController {
                 media.select(['id',"media_url","media_type"])
             }).where('id','=',id)
            if(data){
-            return sendSuccess(response,{data:data[0],message:"Property information"})
+            const user = await this.loginService.loggedInUser(auth)
+            const d:Partial<Property> = {
+                ...data[0].$attributes,
+                amenities:data[0].amenities,
+                fees:data[0].fees,
+                legalRequirements:data[0].legalRequirements,
+                owner:data[0].owner,
+                utilities:data[0].utilities,
+                currency:data[0].currency,
+                mediaItems:data[0].mediaItems,
+                //@ts-ignore
+                isSaved:user ? await this.propertyService.isSavedProperty(user.id,data[0].id) : false
+            }
+            return sendSuccess(response,{data:d,message:"Property information"})
            }else{
             return sendError(response,{message:"Property not found",code:404})
            }
