@@ -6,7 +6,7 @@ import type { HasOne } from '@adonisjs/lucid/types/relations'
 import Property from './property.js'
 
 export default class SavedProperty extends BaseModel {
-  public static table = 'save_properties'
+  public static table = 'create_save_properties'
   @column({ isPrimary: true })
   declare id: string
 

@@ -467,6 +467,19 @@ export default class PropertiesController {
         })
       } 
   }
+  async listSaveProperty({response, auth}:HttpContext){
+    try {
+        //const { property_id } = request.params()
+        const user = auth.use('api').user
+        if(!user){
+            return sendError(response, { message: 'Unauthorized', code: 401 })
+        }
+        const items = await SavedProperty.query().select('*').where('user_id','=',user.id).preload('propertyInfo')
+        return sendSuccess(response,{message:"Saved Properties",data:items})
+    } catch (error) {
+        return sendError(response,{message:error.message,code:500})
+    }
+}
 }
 
 
