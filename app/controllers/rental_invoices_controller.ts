@@ -34,7 +34,10 @@ export default class RentalInvoicesController {
             .select('*')
             .where('payer_id','=',user.id)
             .preload('property',(property)=>{
-                property.select(['general_renewal_cycle'])
+                property.select(['general_renewal_cycle','property_title'])
+            })
+            .preload('currency',(currency)=>{
+                currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
             })
             if(input.search && input.search != undefined && input.search != 'undefined'){
                 invoicesQuery.join('properties','rental_invoices.property_id','=','properties.id')

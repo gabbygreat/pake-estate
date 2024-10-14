@@ -15,9 +15,10 @@ router.group(()=>{
     router.get('top-selling',[PropertyController,'topSellingProperties'])
     router.patch('publish',[PropertyController,'publishProperty']).use(middleware.auth({guards:['api']}))
     router.get('hide-property/:id',[PropertyController,'hideProperty']).use(middleware.auth({guards:['api']}))
+    router.get('list-save-properties',[PropertyController,'listSaveProperty']).use(middleware.auth({guards:['api']}))
     router.delete('remove/:id',[PropertyController,'deleteProperty']).use(middleware.auth({guards:['api']}))
     router.delete('delete-review/:id',[PropertyController,'deleteReview']).use(middleware.auth({guards:['api']}))
     router.post('save-property',[PropertyController,'saveProperty']).use(middleware.auth({guards:['api']}))
-    router.get('/location-search-hint/:location',[PropertyController,'searchLocationHint'])
+    router.get('location-search-hint/:location',[PropertyController,'searchLocationHint'])
     
 }).prefix('/property')

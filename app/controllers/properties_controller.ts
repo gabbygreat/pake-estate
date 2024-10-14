@@ -11,8 +11,7 @@ import { createReviewValidator } from '#validators/review'
 import { inject } from '@adonisjs/core'
 import PropertyLegalRequirement from '#models/property_legal_requirement'
 import PropertyTenant from '#models/property_tenant'
-import { createPropertyValidator } from '#validators/property'
-
+import SavedProperty from '#models/saved_property'
 
 @inject()
 export default class PropertiesController {
@@ -107,6 +106,7 @@ export default class PropertiesController {
                 currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
             })
             if(input.search){
+                console.log('currency')
                 query.andWhere((q)=>{
                     q.whereRaw('property_title % ? OR property_description % ?',Array(2).fill(input.search))
                 })
@@ -427,28 +427,63 @@ export default class PropertiesController {
         return sendError(response, { error: error, message: error.message })
     }
   }
+
   public async saveProperty({request, response, auth}:HttpContext){
     try{
         const user = auth.use('api').user
         if(!user){
             return sendError(response, { message: 'Unauthorized', code: 401 })
         }
-        const property = Property.create({owner_id: user.id})
-        await request.validateUsing(createPropertyValidator)
-        return sendSuccess(response, {
-            message: 'Property saved successfully',
-            data: property,
+        const { property_id } = request.body()
+        const property = await Property.find(property_id)
+        if (!property) {
+                return sendError(response, { message: 'Property not found', code: 404 })
+            }
+        // check if the property has been saved
+          const existingSave = await SavedProperty
+          .query()
+          .select(['id'])
+          .where("user_id","=",user.id)
+          .andWhere ('property_id',"=", property_id)
+          if (existingSave[0]) {
+            return sendError(response, { message: 'Property already saved', code: 400 })
+          }
+
+        // save the property
+          const savedProperty = await SavedProperty.create({
+            user_id: user.id,
+            property_id: property_id,
           })
+          return sendSuccess(response, {
+            message: 'Property saved successfully',
+            data: savedProperty,
+          })
+       // await request.validateUsing(savePropertyValidator)
     }catch (error) {
+        console.log(error)
         // Handle validation errors or other errors
         return sendError(response, {
           message: 'Error saving property',
           error: error.messages || error.message,
           code: 400,
         })
-      }
+      } 
   }
+  async listSaveProperty({response, auth}:HttpContext){
+    try {
+        //const { property_id } = request.params()
+        const user = auth.use('api').user
+        if(!user){
+            return sendError(response, { message: 'Unauthorized', code: 401 })
+        }
+        const items = await SavedProperty.query().select('*').where('user_id','=',user.id).preload('propertyInfo')
+        return sendSuccess(response,{message:"Saved Properties",data:items})
+    } catch (error) {
+        return sendError(response,{message:error.message,code:500})
+    }
 }
+}
+
 
 
    
