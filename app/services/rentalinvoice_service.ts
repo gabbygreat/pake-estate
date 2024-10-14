@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Property from '#models/property'
 import PropertyTenant from '#models/property_tenant'
 import RentalInvoice from '#models/rental_invoice'
@@ -11,7 +12,7 @@ export default class RentalInvoiceService {
         totalAmount += e.amount - ((e.discount/100) * e.amount)
     })
     const property = await Property.query()
-    .select(['general_renewal_cycle']).where('id','=',property_id)
+    .select(['general_renewal_cycle','currency_id']).where('id','=',property_id)
     const today = new Date()
     const dueDate = new Date(today.getTime() + 1000 * (3600 * 24 * 7)) //7 DAYS
     const nextPaymentDate = property[0].general_renewal_cycle == 'daily' ?
@@ -29,6 +30,7 @@ export default class RentalInvoiceService {
         payer_id:applicant_id,
         tenant_id,
         property_id,
+        currency_id: property[0].currency_id!,
         total_amount: totalAmount,
         due_date: dueDate,
         next_payment_date: nextPaymentDate as any,
