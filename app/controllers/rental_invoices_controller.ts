@@ -31,7 +31,7 @@ export default class RentalInvoicesController {
             const user = auth.use('api').user!
 
             const invoicesQuery = RentalInvoice.query()
-            .select([])
+            .select('*')
             .where('payer_id','=',user.id)
             .preload('property',(property)=>{
                 property.select(['general_renewal_cycle'])
