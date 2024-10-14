@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { HttpContext } from '@adonisjs/core/http'
@@ -12,12 +13,14 @@ import { inject } from '@adonisjs/core'
 import PropertyLegalRequirement from '#models/property_legal_requirement'
 import PropertyTenant from '#models/property_tenant'
 import SavedProperty from '#models/saved_property'
+import LoginService from '#services/login_service'
 
 @inject()
 export default class PropertiesController {
     constructor(
          protected uploadService:FileUploadService,
-         protected propertyService:PropertyService
+         protected propertyService:PropertyService,
+         protected loginService: LoginService
     ){}
 
     async composeProperty({request,response,auth}:HttpContext){
@@ -171,9 +174,25 @@ export default class PropertiesController {
                 query.andWhere((q)=>{q.whereRaw(locationQuery)})
             }
             const data = await query.paginate(input.page ?? 1, input.perPage ?? 20)
-            return sendSuccess(response,{message:"Property listing", data})
+            const processedData:Array<any> = []
+            
+            const user = await this.loginService.loggedInUser(auth)
+            for(const item of data){
+                processedData.push({
+                    ...item.$attributes,
+                    mediaItems:item.mediaItems,
+                    currency:item.currency,
+                    //@ts-ignore
+                    isSaved:user ? await this.propertyService.isSavedProperty(user.id,item.id) : false
+                })
+            }
+            return sendSuccess(response,{message:"Property listing", data:
+                {
+                  properties:processedData,
+                  meta: data.getMeta()  
+                }
+            })
         } catch (error) {
-            console.log(error)
             return sendError(response,{message:error.message,code:500})
         }
     }

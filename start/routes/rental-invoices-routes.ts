@@ -6,5 +6,6 @@ router.group(()=>{
 
     router.get('all',[RentalInvoicesController,'allInvoices']).use(middleware.auth({guards:['api']}))
     router.get('info/:id',[RentalInvoicesController, 'invoiceInformation'])
+    router.get('pay-rent/:id',[RentalInvoicesController,'processPayment'])
 
 }).prefix('/invoice')

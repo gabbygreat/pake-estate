@@ -3,15 +3,19 @@ import RentalInvoice from '#models/rental_invoice'
 import type { HttpContext } from '@adonisjs/core/http'
 import { sendError, sendSuccess } from '../utils.js'
 import RentalInvoiceService from '#services/rentalinvoice_service'
-// import db from '@adonisjs/lucid/services/db'
-// import Wallet from '#models/wallet'
+import NotificationService from '#services/notification_service'
+import db from '@adonisjs/lucid/services/db'
+import Wallet from '#models/wallet'
 import { inject } from '@adonisjs/core'
+import Notification from '#models/notification'
+import Property from '#models/property'
 
 @inject()
 export default class RentalInvoicesController {
 
     constructor(
-        protected rentalInvoiceService: RentalInvoiceService
+        protected rentalInvoiceService: RentalInvoiceService,
+        protected notificationService: NotificationService
     ){
 
     }
@@ -56,8 +60,7 @@ export default class RentalInvoicesController {
                 message:"Rental Invoices",
                 data: invoices
             })
-        } catch(e) {
-            console.log(e)
+        } catch {
             return sendError(response,{message:"Rental Invoices", code: 500})
         }
     }
@@ -79,20 +82,78 @@ export default class RentalInvoicesController {
         }
     }
 
-    // async processPayment({ request,auth,response}:HttpContext){
-    //     try {
-    //         const { id } = request.params()
-    //         const user = auth.use('api').user!
-    //         await db.transaction(async(client)=>{
-    //             const invoice = await RentalInvoice.find(id,{client})
-    //             //Check wallet balance
-    //             //@ts-ignore
-    //             const balance = await Wallet.query().select('*').where((q)=>q.whereRaw(`user_id = ? AND currency_id = ?`,[user?.id,invoice?.currency_id!]))
-    //             console.log(balance)
-    //         })
-    //     } catch (error) {
-    //         console.log(error)
-    //         return sendError(response,{message:"Rental Invoices", code: 500}) 
-    //     }
-    // }
+    async processPayment({ request,auth,response}:HttpContext){
+        try {
+            const { id } = request.params()
+            const user = auth.use('api').user!
+            await db.transaction(async(client)=>{
+                const invoice = await RentalInvoice.find(id,{client})
+                if(invoice && user && user.id === invoice.payer_id){
+                    const balance = await Wallet.query({client}).select('*')
+                    .where((q)=>q.whereRaw(`user_id = ? AND currency_id = ?`,[
+                        user.id,
+                        invoice.currency_id
+                    ]))
+                    if(balance[0].balance >= invoice.total_amount){
+                        balance[0].balance -= invoice.total_amount
+                        invoice.status = 'paid'
+                        invoice.payment_date = new Date()
+                        await invoice.useTransaction(client).save()
+                        await balance[0].useTransaction(client).save()
+
+                        //Property information
+                        const property = await Property.query().select(['property_title','owner_id']).where('id','=',invoice.property_id)
+                        //NOTIFY LANDLORD
+                        const notificationTemplate = this.notificationService
+                        .message()['RENTAL_PAYMENT_NOTIFICATION_FOR_LANDLORD'](
+                            {
+                                property_name: 
+                                property[0].property_title, 
+                                tenant_name:`${user?.firstname} ${user?.lastname}`,
+                                date:new Date().toUTCString()
+                            })
+                        await Notification.create(
+                        {
+                            user_id: property[0].owner_id,
+                            title: notificationTemplate.title,
+                            message: notificationTemplate.message,
+                            type: notificationTemplate.type,
+                            actor_refs: JSON.stringify([user.id]),
+                            entity_ids: JSON.stringify({ property_id: invoice.property_id }),
+                            slug: 'RENTAL_PAYMENT_NOTIFICATION_FOR_LANDLORD',
+                        },
+                        { client }
+                        )
+                        //NOTIFY TENANT
+                        const notificationTemplate_1 = this.notificationService
+                        .message()['RENTAL_PAYMENT_NOTIFICATION_FOR_TENANT'](
+                            {
+                                property_name: 
+                                property[0].property_title, 
+                                date:new Date().toUTCString()
+                            })
+                        await Notification.create(
+                        {
+                            user_id: user.id,
+                            title: notificationTemplate_1.title,
+                            message: notificationTemplate_1.message,
+                            type: notificationTemplate_1.type,
+                            actor_refs: JSON.stringify([user.id]),
+                            entity_ids: JSON.stringify({ property_id: invoice.property_id }),
+                            slug: 'RENTAL_PAYMENT_NOTIFICATION_FOR_TENANT',
+                        },
+                        { client }
+                        )
+                        return sendSuccess(response,{message:"Payment successful"})
+                    }else{
+                        return sendError(response,{message:"Insufficient balance",code:400}) 
+                    }
+                }else{
+                    return sendError(response,{message:"Invoice not found",code:400})
+                }
+            })
+        } catch {
+            return sendError(response,{message:"Rental Invoices", code: 500}) 
+        }
+    }
 }

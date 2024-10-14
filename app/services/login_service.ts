@@ -1,6 +1,8 @@
 import User from "#models/user"
 import axios from "axios"
 import NotificationService from "./notification_service.js"
+import { Authenticator } from "@adonisjs/auth"
+import { Authenticators } from "@adonisjs/auth/types"
 // import type { Authenticator } from '@adonisjs/auth'
 // import { Authenticators } from "@adonisjs/auth/types"
 
@@ -66,6 +68,17 @@ export default class LoginService {
           }
         } else {
           return { error: true, message: 'invalid user' }
+        }
+      }
+
+      async loggedInUser(auth:Authenticator<Authenticators>):Promise<User|null>{
+        try {
+          if(auth.isAuthenticated){
+            return auth.use('api').user!
+          }
+          return null
+        } catch {
+          return null
         }
       }
 }
