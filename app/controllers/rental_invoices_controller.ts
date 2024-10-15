@@ -90,11 +90,9 @@ export default class RentalInvoicesController {
     async processPayment({ request,auth,response}:HttpContext){
         try {
             const { id } = request.params()
-            const user = auth.use('api').user!
             await db.transaction(async(client)=>{
+                const user = auth.use('api').user!
                 const invoice = await RentalInvoice.find(id,{client})
-                console.log("INVOICE ",invoice?.tenant_id)
-                console.log("CURRENT USER ",user?.id)
                 if(invoice && user && user.id === invoice.tenant_id){
                     const balance = await Wallet.query({client}).select('*')
                     .where((q)=>q.whereRaw(`user_id = ? AND currency_id = ?`,[
