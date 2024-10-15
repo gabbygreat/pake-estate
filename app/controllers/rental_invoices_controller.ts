@@ -68,13 +68,18 @@ export default class RentalInvoicesController {
     async invoiceInformation({ request,response }:HttpContext){
         try {
             const { id } = request.params()
-            const invoice = await RentalInvoice.query().select('*').where('id','=',id)
+            const invoice = await RentalInvoice
+            .query()
+            .select('*').where('id','=',id)
+            .preload('currency',(currency)=>{
+                currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+            })
             const { fees } = await this.rentalInvoiceService.invoiceFees(invoice[0].tenant_id)
             return sendSuccess(response,{
                 message:"Invoice Information",
                 data:{
                     fees,
-                    invoice
+                    invoice:invoice[0]
                 }
             })
         } catch {
