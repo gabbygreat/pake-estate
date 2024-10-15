@@ -73,7 +73,7 @@ export default class LoginService {
 
       async loggedInUser(auth:Authenticator<Authenticators>):Promise<User|null>{
         try {
-          if(auth.isAuthenticated){
+          if(await auth.check()){
             return auth.use('api').user!
           }
           return null

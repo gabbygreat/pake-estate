@@ -492,7 +492,6 @@ export default class PropertiesController {
           })
        // await request.validateUsing(savePropertyValidator)
     }catch (error) {
-        console.log(error)
         // Handle validation errors or other errors
         return sendError(response, {
           message: 'Error saving property',
