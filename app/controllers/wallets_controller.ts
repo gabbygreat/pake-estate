@@ -83,6 +83,7 @@ export default class WalletsController {
         balances.total_sent = Number(balances.total_sent)
         return sendSuccess(response,{message:"Wallet Balance", data:{balances,wallet:walletBalance[0]}})
         } catch (error) {
+            console.log(error)
             return sendError(response,{message:"Error fetching wallet balance info", code:500})
         }
     }
