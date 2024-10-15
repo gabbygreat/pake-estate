@@ -467,29 +467,25 @@ export default class PropertiesController {
             return sendError(response, { message: 'Unauthorized', code: 401 })
         }
         const { property_id } = request.body()
-        const property = await Property.find(property_id)
-        if (!property) {
-                return sendError(response, { message: 'Property not found', code: 404 })
-            }
-        // check if the property has been saved
-          const existingSave = await SavedProperty
-          .query()
-          .select(['id'])
-          .where("user_id","=",user.id)
-          .andWhere ('property_id',"=", property_id)
-          if (existingSave[0]) {
-            return sendError(response, { message: 'Property already saved', code: 400 })
-          }
-
-        // save the property
-          const savedProperty = await SavedProperty.create({
-            user_id: user.id,
-            property_id: property_id,
-          })
-          return sendSuccess(response, {
-            message: 'Property saved successfully',
-            data: savedProperty,
-          })
+        //check if the property has been saved
+        const existingSave = await SavedProperty
+        .query()
+        .select(['id'])
+        .where("user_id","=",user.id)
+        .andWhere ('property_id',"=", property_id)
+        if (existingSave[0]) {
+        await existingSave[0].delete()
+        return sendSuccess(response, { message: 'Updated' })
+        }
+        //save the property
+        const savedProperty = await SavedProperty.create({
+        user_id: user.id,
+        property_id: property_id,
+        })
+        return sendSuccess(response, {
+        message: 'Property saved successfully',
+        data: savedProperty,
+        })
        // await request.validateUsing(savePropertyValidator)
     }catch (error) {
         // Handle validation errors or other errors
