@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable prefer-const */
@@ -59,8 +60,12 @@ export default class WalletsController {
         try {
             const { currencyId } = request.params()
             const user = auth.use('api').user!
-            const walletBalance = await Wallet.query()
+
+            let walletBalance = await Wallet.query()
             .select(['id','balance']).where((q)=>q.whereRaw(`currency_id = ? AND user_id = ?`,[currencyId,user.id]))
+            if(!walletBalance[0]){
+                walletBalance[0] = await Wallet.create({user_id:user?.id,currency_id:currencyId,balance:0})
+            }
             const query = await db.rawQuery(`
                 SELECT
                     (SELECT SUM(amount_paid)
@@ -122,7 +127,6 @@ export default class WalletsController {
                 const check = await ClientCurrency.query().select(['id','default_currency']).where((q)=>q.whereRaw('currency_id = ? AND user_id = ?',[c.id,user.id]))
                 if(!check[0]){
                     await ClientCurrency.create({currency_id:c.id,user_id:user.id,supported:true})
-                    await Wallet.create({currency_id:c.id,balance:0,user_id:user.id})
                 }
             }
             //Make one default if none for the user
