@@ -503,7 +503,14 @@ export default class PropertiesController {
         if(!user){
             return sendError(response, { message: 'Unauthorized', code: 401 })
         }
-        const items = await SavedProperty.query().select('*').where('user_id','=',user.id).preload('propertyInfo')
+        const items = await SavedProperty.query().select('*').where('user_id','=',user.id)
+        .preload('propertyInfo',(item)=>{
+            item.select('*')
+            .preload('currency',(currency)=>{
+                currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+            })
+        })
+
         return sendSuccess(response,{message:"Saved Properties",data:items})
     } catch (error) {
         return sendError(response,{message:error.message,code:500})

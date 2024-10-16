@@ -90,7 +90,8 @@ export default class RentalInvoicesController {
     async processPayment({ request,auth,response}:HttpContext){
         try {
             const { id } = request.params()
-            const user = auth.use('api').user
+            const user = auth.use('api').user!
+            console.log(user.id)
             await db.transaction(async(client)=>{
                 const invoice = await RentalInvoice.find(id,{client})
                 if(invoice && user && user.id === invoice.tenant_id){
