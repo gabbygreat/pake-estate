@@ -513,8 +513,24 @@ export default class PropertiesController {
                 media.select(['id',"media_url","media_type"])
             })
         })
-
-        return sendSuccess(response,{message:"Saved Properties",data:items})
+        .preload('owner',(owner)=>{
+            owner.select('*') //TODO:OPTIMIZE
+        })
+       const properties:Array<any> = []
+        
+       for(const item of items){
+        const user = await this.loginService.loggedInUser(auth)
+         properties.push({
+            ...item.propertyInfo.$attributes,
+            owner:item.propertyInfo.owner,
+            currency:item.propertyInfo.currency,
+            mediaItems:item.propertyInfo.mediaItems,
+            //@ts-ignore
+            isSaved:user ? await this.propertyService.isSavedProperty(user.id,data[0].id) : false
+        })
+       }
+        
+        return sendSuccess(response,{message:"Saved Properties",data:properties})
     } catch (error) {
         return sendError(response,{message:error.message,code:500})
     }
