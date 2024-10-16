@@ -509,6 +509,9 @@ export default class PropertiesController {
             .preload('currency',(currency)=>{
                 currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
             })
+            .preload('mediaItems',(media)=>{
+                media.select(['id',"media_url","media_type"])
+            })
         })
 
         return sendSuccess(response,{message:"Saved Properties",data:items})
