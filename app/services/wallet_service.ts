@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import WalletPayment from "#models/wallet_payment"
 import env from "#start/env"
 import { cuid } from "@adonisjs/core/helpers"
@@ -30,8 +32,8 @@ export default class WalletService{
             metadata: { reference: reference },
             customer_email: email,
             mode: 'payment',
-            success_url: `${env.get('STRIPE_RESPONSE_URL')}payment-success`,
-            cancel_url: `${env.get('STRIPE_RESPONSE_URL')}payment-error`,
+            success_url: `${env.get('STRIPE_RESPONSE_URL')}dashboard/property-management-system/landlord/financial-reports?currentTab=Transcation+History&fundStatus=successful`,
+            cancel_url: `${env.get('STRIPE_RESPONSE_URL')}dashboard/property-management-system/landlord/financial-reports?currentTab=Transcation+History&fundStatus=failed`,
           })
       
           return {
