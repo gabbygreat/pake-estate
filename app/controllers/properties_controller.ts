@@ -526,7 +526,7 @@ export default class PropertiesController {
             currency:item.propertyInfo.currency,
             mediaItems:item.propertyInfo.mediaItems,
             //@ts-ignore
-            isSaved:user ? await this.propertyService.isSavedProperty(user.id,data[0].id) : false
+            isSaved:user ? await this.propertyService.isSavedProperty(user.id,item.propertyInfo.id) : false
         })
        }
         
