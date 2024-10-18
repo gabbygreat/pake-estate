@@ -11,14 +11,14 @@ emitter.on('message:persist',[SaveMessageEvent, 'handle'])
 //@ts-ignore
 emitter.on('checkout_success_stripe', async (data: WebHookObject) => {
     try {
-      console.log(`stripe success data `,data)
       const reference = data?.client_reference_id!
       const payment_id =  data.payment_intent
       const payment = await WalletPayment.findBy('payment_reference',reference)
       if(payment && payment.payment_status === 'pending'){
         const wallet = await Wallet.find(payment.wallet_id)
         if(wallet){
-            wallet.balance += Number(payment.amount_paid)
+            wallet.balance = Number(wallet.balance) + Number(payment.amount_paid)
+            console.log("NEW BALANCE IS ",wallet.balance)
             await wallet.save()
             payment.payment_status = 'completed'
             payment.channel_payment_id = payment_id
