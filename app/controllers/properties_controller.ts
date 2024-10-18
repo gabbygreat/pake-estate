@@ -496,14 +496,34 @@ export default class PropertiesController {
         })
       } 
   }
-  async listSaveProperty({response, auth}:HttpContext){
+  async listSaveProperty({request,response, auth}:HttpContext){
     try {
         //const { property_id } = request.params()
         const user = auth.use('api').user
         if(!user){
             return sendError(response, { message: 'Unauthorized', code: 401 })
         }
-        const items = await SavedProperty.query().select('*').where('user_id','=',user.id)
+        interface Filter {
+            owner?:boolean|string //IF THIS IS OWNER,FETCH BOTH PUBLISHED AND UNPUBLISHED ELSE FETCH ONLY PUBLISHED
+            search?: string
+            forReview?:boolean|string,
+            sort?:'recent'|'oldest'
+            page?: number
+            perPage?:number,
+            latitude?:number,
+            longitude?:number,
+            bedrooms?:number,
+            bathrooms?:number,
+            maxPrice?:number,
+            minPrice?:number
+            location?:string
+            propertyType?:string
+            listingType?:'sale'|'rent',
+            currency?:string
+        }
+        const input:Filter = request.qs()
+        const itemsQuery =  SavedProperty.query().select('*')
+        .where('user_id','=',user.id)
         .preload('propertyInfo',(item)=>{
             item.select('*')
             .preload('currency',(currency)=>{
@@ -516,6 +536,80 @@ export default class PropertiesController {
         .preload('owner',(owner)=>{
             owner.select('*') //TODO:OPTIMIZE
         })
+        
+        itemsQuery.join('properties','properties.id','create_save_properties.property_id')
+        
+        if(input.search){
+            console.log('currency')
+            itemsQuery.andWhere((q)=>{
+                q.whereRaw('property_title % ? OR property_description % ?',Array(2).fill(input.search))
+            })
+        }
+        
+        if(input.owner && (input.owner === true || input.owner === 'true')){
+            const user = await auth.authenticate()
+            itemsQuery.andWhere('owner_id','=',user.id)
+        }else{
+            itemsQuery.andWhere('current_state','=','published').andWhere('hidden','=',false)
+        }
+
+        if(input.forReview && (input.forReview === true || input.forReview === 'true')){
+            itemsQuery.orderBy('total_reviews', 'desc')
+        }
+        if(input.listingType){
+            itemsQuery.andWhere('listing_type','=',input.listingType)
+        }
+        if(input.bedrooms && input.bedrooms !== null && input.bedrooms !== 'undefined' as any && input.bedrooms !== undefined){
+            if(input.bedrooms == 5){
+                itemsQuery.andWhere('bedrooms','>=',input.bedrooms)
+            }else{
+                itemsQuery.andWhere('bedrooms','=',input.bedrooms)
+            }
+        }
+        if(input.bathrooms && input.bedrooms !== null && input.bedrooms !== 'undefined' as any && input.bedrooms !== undefined){
+            itemsQuery.andWhere('bathrooms','=',input.bathrooms)
+        }
+        if(input.minPrice && !isNaN(input.minPrice)){
+            itemsQuery.andWhere('general_rent_fee','>=',Number(input.minPrice))
+        }
+        if(input.maxPrice && !isNaN(input.maxPrice)){
+            itemsQuery.andWhere('general_rent_fee','<=',Number(input.maxPrice))
+        }
+        if(input.propertyType && input.propertyType !== 'undefined' && input.propertyType !== undefined){
+            itemsQuery.andWhere('property_type','=',input.propertyType)
+        }
+        if(input.sort){
+            itemsQuery.orderBy('created_at', input.sort === 'oldest' ? 'asc' : 'desc')
+        }
+        if(input.location && input.location != undefined && input.location !== 'undefined' && input.location !=''){
+            const [city,state,country] = input.location
+            if(city){
+                itemsQuery.andWhere((q)=>q.whereRaw(`city % ?`,[city]))
+            }
+            if(state){
+                itemsQuery.andWhere((q)=>q.whereRaw(`state % ?`,[state]))
+            }
+            if(country){
+                itemsQuery.andWhere((q)=>q.whereRaw(`country % ?`,[country]))
+            }
+        }
+        if(input.currency && input.currency !== undefined && input.currency !== 'undefined'){
+            itemsQuery.andWhere('currency_id','=',input.currency)
+        }
+        if(input.latitude && input.longitude){
+            const {maxLat,maxLng,minLat,minLng} = calculateBoundingBox(input.latitude,input.longitude,5)//5KM AREA
+            const locationQuery = gisQuery({
+                startLatitude:minLat,
+                startLongitude:minLng,
+                stopLatitude:maxLat,
+                stopLongitude:maxLng
+            })
+            itemsQuery.andWhere((q)=>{q.whereRaw(locationQuery)})
+        }
+
+       const items = await itemsQuery
+       .orderBy('create_save_properties.created_at','desc')
+       .paginate(input.page || 1, input.perPage || 20)
        const properties:Array<any> = []
         
        for(const item of items){
@@ -530,7 +624,7 @@ export default class PropertiesController {
         })
        }
         
-        return sendSuccess(response,{message:"Saved Properties",data:properties})
+        return sendSuccess(response,{message:"Saved Properties",data:{properties,meta:items.getMeta()}})
     } catch (error) {
         return sendError(response,{message:error.message,code:500})
     }
