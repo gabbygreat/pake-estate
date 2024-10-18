@@ -64,6 +64,7 @@ export default class WalletService{
       async createDepositPayment(data:Partial<WalletPayment>){
         try {
             const ref = cuid()
+            console.log("REFERENCE ",ref)
             await WalletPayment.create({...data,payment_reference:ref})
             return ref
         } catch (error) {

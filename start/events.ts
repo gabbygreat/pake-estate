@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import emitter from '@adonisjs/core/services/emitter'
 import SaveMessageEvent from '#listeners/save_message'
 import { WebHookObject } from '#services/wallet_service'
@@ -9,6 +11,7 @@ emitter.on('message:persist',[SaveMessageEvent, 'handle'])
 //@ts-ignore
 emitter.on('checkout_success_stripe', async (data: WebHookObject) => {
     try {
+      console.log(`stripe success data `,data)
       const reference = data?.client_reference_id!
       const payment_id =  data.payment_intent
       const payment = await WalletPayment.findBy('payment_reference',reference)
