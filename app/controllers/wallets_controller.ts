@@ -27,7 +27,7 @@ export default class WalletsController {
         try {
             const user = auth.use('api').user
 
-            const { wallet_id, payment_method, amount } = request.body()
+            const { wallet_id, payment_method, amount, success_url,error_url } = request.body()
             const wallet = await Wallet.query()
             .select('*').whereRaw('id = ? AND user_id = ?',[wallet_id,user?.id!])
             .preload('currency',(currency)=>{
@@ -43,7 +43,13 @@ export default class WalletsController {
                         transaction_type:'DEPOSIT'
                     })
                     if(ref){
-                        const {error,data} = await this.walletService.createStripePaymentLink(amount,wallet[0].currency.code,ref,user?.email!)
+                        const {error,data} = await this.walletService.createStripePaymentLink(
+                            amount,wallet[0].currency.code,
+                            ref,
+                            user?.email!,
+                            success_url,
+                            error_url
+                        )
                         if(!error){
                             return sendSuccess(response,{message:"Payment link generated", data})
                         }
