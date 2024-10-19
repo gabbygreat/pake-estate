@@ -579,7 +579,7 @@ export default class PropertiesController {
             itemsQuery.andWhere('property_type','=',input.propertyType)
         }
         if(input.sort){
-            itemsQuery.orderBy('created_at', input.sort === 'oldest' ? 'asc' : 'desc')
+            itemsQuery.orderBy('properties.created_at', input.sort === 'oldest' ? 'asc' : 'desc')
         }
         if(input.location && input.location != undefined && input.location !== 'undefined' && input.location !=''){
             const [city,state,country] = input.location
