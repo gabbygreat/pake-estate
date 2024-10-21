@@ -13,6 +13,7 @@ import Wallet from '#models/wallet';
 import db from '@adonisjs/lucid/services/db';
 import WalletService, { WebHookAccRef, WebHookObject } from '#services/wallet_service';
 import { inject } from '@adonisjs/core';
+import WalletPayment from '#models/wallet_payment';
 
 @inject()
 export default class WalletsController {
@@ -115,13 +116,42 @@ export default class WalletsController {
     //     }
     // }
 
-    // async transactionHistory({ request,auth,response}:HttpContext){
-    //     try {
-            
-    //     } catch (error) {
-            
-    //     }
-    // }
+    async transactionHistory({ request,response}:HttpContext){
+        try {
+            //const user = auth.use('api').user!
+            interface Filter{
+                wallet_id?:string,
+                status?: string
+                search?: string
+                type?: string
+                start?:string
+                end?:string,
+                page?:number
+                perPage?:number
+            }
+            const input:Filter = request.qs()
+            const dataQuery = WalletPayment.query()
+            .select('*')
+            .where('wallet_id','=',input.wallet_id!)
+
+            if(input.status){
+                dataQuery.andWhere('payment_status','=',input.status)
+            }
+            if(input.search){
+                dataQuery.andWhere((q)=>q.whereRaw(`description % ?`,[input.search!]))
+            }
+            if(input.start && input.end){
+                dataQuery.andWhereBetween('updated_at',[input.start,input.end])
+            }
+            if(input.type){
+                dataQuery.andWhere('transaction_type','=',input.type)
+            }
+            const data = await dataQuery.orderBy('created_at','desc').paginate(input.page || 1,input.perPage)
+            return sendSuccess(response,{message:"Transaction History", data})
+        } catch (error) {
+            return sendError(response,{message:"Failed to fetch payment history", code:500})
+        }
+    }
 
     async supportedCurrency({ auth,response }:HttpContext){
         try {

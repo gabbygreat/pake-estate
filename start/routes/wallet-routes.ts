@@ -8,4 +8,5 @@ router.group(()=>{
     router.get('balance-info/:currencyId',[WalletsController,'walletBalanceInfo']).use(middleware.auth({guards:['api']}))
     router.post('fund',[WalletsController,'fundWallet']).use(middleware.auth({guards:['api']}))
     router.post('stripe-x-hook',[WalletsController,'stripeMC_Call_xtx'])
+    router.get('payment-history',[WalletsController, 'transactionHistory']).use(middleware.auth({guards:['api']}))
 }).prefix('/wallet')

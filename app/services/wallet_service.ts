@@ -94,7 +94,7 @@ export default class WalletService{
             currency_id:currency,
             amount_paid:amount,
             description,
-            payment_gateway: '',
+            payment_gateway: 'Wallet',
             payment_reference: `cred_${cuid()}`,
             payment_status: 'completed',
             transaction_type: 'CREDIT'
@@ -121,7 +121,7 @@ export default class WalletService{
             currency_id:currency,
             amount_paid:amount,
             description,
-            payment_gateway: '',
+            payment_gateway: 'Wallet',
             payment_reference: `dep_${cuid()}`,
             payment_status: 'completed',
             transaction_type: 'DEBIT'
