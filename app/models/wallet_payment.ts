@@ -25,7 +25,7 @@ export default class WalletPayment extends BaseModel {
   declare payment_status:'completed'|'pending'|'failed'
 
   @column()
-  declare transaction_type:'DEPOSIT'|'WITHDRAWAL'|'TRANSFER'|'CREDIT'
+  declare transaction_type:'DEPOSIT'|'WITHDRAWAL'|'TRANSFER'|'CREDIT'|'DEBIT'
 
   @column()
   declare payment_gateway: string
