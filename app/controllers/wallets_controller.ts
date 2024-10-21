@@ -79,14 +79,14 @@ export default class WalletsController {
                     WHERE currency_id = '${currencyId}'
                     AND payment_status = 'completed'
                     AND wallet_id = '${walletBalance[0].id}'
-                    AND transaction_type = 'DEPOSIT') AS total_received,
+                    AND transaction_type = 'DEPOSIT' OR transaction_type='CREDIT') AS total_received,
 
                     (SELECT SUM(amount_paid)
                     FROM wallet_payments
                     WHERE currency_id = '${currencyId}'
                     AND payment_status = 'completed'
                     AND wallet_id = '${walletBalance[0].id}'
-                    AND (transaction_type = 'WITHDRAW' OR transaction_type='TRANSFER')) AS total_sent;
+                    AND (transaction_type = 'WITHDRAWAL' OR transaction_type='TRANSFER' OR transaction_type='DEBIT')) AS total_sent;
 
         `)
         const balances = query.rows[0]
