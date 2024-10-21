@@ -4,6 +4,8 @@ import WalletPayment from "#models/wallet_payment"
 import env from "#start/env"
 import { cuid } from "@adonisjs/core/helpers"
 import Stripe from 'stripe'
+import { TransactionClientContract } from "@adonisjs/lucid/types/database"
+import Wallet from "#models/wallet"
 
 export const stripe = new Stripe(env.get('STRIPE_SECRET_KEY'))
 
@@ -71,6 +73,33 @@ export default class WalletService{
         } catch (error) {
             return null
         }
+      }
+
+      async creditWallet(
+        {user_id,currency,amount,description,client}
+        :{user_id:string,
+          currency:string,
+          amount:number,
+          description:string,
+          client:TransactionClientContract}){
+
+          const wallet = await Wallet.query({client}).select('*')
+          .where((q)=>q.whereRaw(`user_id = ? AND currency_id = ?`,[user_id,currency]))
+
+          wallet[0].balance = Number(wallet[0].balance) + Number(amount)
+          await wallet[0].useTransaction(client).save()
+
+          await WalletPayment.create({
+            wallet_id:wallet[0].id,
+            currency_id:currency,
+            amount_paid:amount,
+            description,
+            payment_gateway: '',
+            payment_reference: `cred_${cuid()}`,
+            payment_status: 'completed',
+            transaction_type: 'CREDIT'
+          },{client})
+
       }
 }
 

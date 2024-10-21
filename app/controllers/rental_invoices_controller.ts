@@ -9,13 +9,15 @@ import Wallet from '#models/wallet'
 import { inject } from '@adonisjs/core'
 import Notification from '#models/notification'
 import Property from '#models/property'
+import WalletService from '#services/wallet_service'
 
 @inject()
 export default class RentalInvoicesController {
 
     constructor(
         protected rentalInvoiceService: RentalInvoiceService,
-        protected notificationService: NotificationService
+        protected notificationService: NotificationService,
+        protected walletService: WalletService
     ){
 
     }
@@ -111,6 +113,14 @@ export default class RentalInvoicesController {
 
                         //Property information
                         const property = await Property.query().select(['property_title','owner_id']).where('id','=',invoice.property_id)
+                        //Credit Landlord
+                        await this.walletService.creditWallet({
+                            user_id:property[0].owner_id,
+                            description:`Rental Payment for ${property[0].property_title} by ${user?.firstname} ${user?.lastname}`,
+                            amount:invoice.total_amount,
+                            currency:invoice.currency_id,
+                            client
+                        })
                         //NOTIFY LANDLORD
                         const notificationTemplate = this.notificationService
                         .message()['RENTAL_PAYMENT_NOTIFICATION_FOR_LANDLORD'](
