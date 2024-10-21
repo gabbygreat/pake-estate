@@ -94,13 +94,16 @@ export default class RentalInvoicesController {
             await db.transaction(async(client)=>{
                 const invoice = await RentalInvoice.find(id,{client})
                 if(invoice && user){
+                    if(invoice.status == 'paid'){
+                        return sendError(response,{message:"Invoice already paid for", code:403})
+                    }
                     const balance = await Wallet.query({client}).select('*')
                     .where((q)=>q.whereRaw(`user_id = ? AND currency_id = ?`,[
                         user.id,
                         invoice.currency_id
                     ]))
-                    if(balance[0].balance >= invoice.total_amount){
-                        balance[0].balance -= invoice.total_amount
+                    if(Number(balance[0].balance) >= Number(invoice.total_amount)){
+                        balance[0].balance = balance[0].balance - invoice.total_amount
                         invoice.status = 'paid'
                         invoice.payment_date = new Date()
                         await invoice.useTransaction(client).save()

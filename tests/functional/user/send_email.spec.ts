@@ -10,7 +10,7 @@ test('send-email',async()=>{
   await emS.setTemplate<WelcomeEmail>('welcome_email',{firstname:'Success'}).sendMail({
     subject:'Welcome onboard!',
     from:'Pake Estate',
-    to:'successonyegbanokwu@gmail.com'
+    to:'eddyiyke3@gmail.com'
   })
 })
 
