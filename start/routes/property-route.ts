@@ -20,5 +20,6 @@ router.group(()=>{
     router.delete('delete-review/:id',[PropertyController,'deleteReview']).use(middleware.auth({guards:['api']}))
     router.post('save-property',[PropertyController,'saveProperty']).use(middleware.auth({guards:['api']}))
     router.get('location-search-hint/:location',[PropertyController,'searchLocationHint'])
+    router.get('my-rented-properties',[PropertyController, 'rentedProperties']).use(middleware.auth({guards:['api']}))
     
 }).prefix('/property')

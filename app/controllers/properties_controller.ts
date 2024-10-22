@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -197,6 +198,43 @@ export default class PropertiesController {
             })
         } catch (error) {
             return sendError(response,{message:error.message,code:500})
+        }
+    }
+
+    public async rentedProperties({ request,auth,response }:HttpContext){
+        try {
+            const { page,perPage } = request.qs()
+            const owner = auth.use('api').user!
+            const query = PropertyTenant.query()
+            .select(['id','property_id'])
+            .where((q)=>q.whereRaw('property_owner_id = ? AND payment_status != ?',[owner.id,'unpaid']))
+            .preload('propertyInfo',(property)=>{
+                property.select('*')
+                .preload('mediaItems',(media)=>{
+                    media.select(['id','media_url','media_type'])
+                })
+                .preload('currency',(currency)=>{
+                    currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+                })
+            })
+            const data = await query.orderBy('created_at','desc').paginate(page || 1, perPage || 10)
+            const properties:Array<any> = []
+            for(const item of data){
+                properties.push({
+                    ...item.propertyInfo.$attributes,
+                    mediaItems: item.propertyInfo.mediaItems,
+                    currency: item.propertyInfo.currency
+                })
+            }
+            return sendSuccess(response,{
+                message:"Rented properties",
+                data:{
+                    properties,
+                    meta:data.getMeta()
+                }
+            })
+        } catch (error) {
+            return sendError(response,{message:"Error fetching rented properties"})
         }
     }
 

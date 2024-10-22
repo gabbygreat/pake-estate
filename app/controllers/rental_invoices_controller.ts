@@ -10,6 +10,7 @@ import { inject } from '@adonisjs/core'
 import Notification from '#models/notification'
 import Property from '#models/property'
 import WalletService from '#services/wallet_service'
+import PropertyTenant from '#models/property_tenant'
 
 @inject()
 export default class RentalInvoicesController {
@@ -120,6 +121,12 @@ export default class RentalInvoicesController {
                         invoice.payment_date = new Date()
                         await invoice.useTransaction(client).save()
 
+                        await PropertyTenant.query({client})
+                        .update({
+                            payment_status:'fully-paid',
+                            payment_date: new Date()
+                        })
+                        .where('id','=',invoice.tenant_id)
                         //Credit Landlord
                         await this.walletService.creditWallet({
                             user_id:property[0].owner_id,
