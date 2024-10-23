@@ -207,6 +207,7 @@ export default class PropertiesController {
             const owner = auth.use('api').user!
             const query = PropertyTenant.query()
             .select(['id','property_id'])
+            .distinctOn(['property_id'])
             .where((q)=>q.whereRaw('property_owner_id = ? AND payment_status != ?',[owner.id,'unpaid']))
             .preload('propertyInfo',(property)=>{
                 property.select('*')
