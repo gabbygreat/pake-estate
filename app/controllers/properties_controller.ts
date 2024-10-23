@@ -207,7 +207,7 @@ export default class PropertiesController {
             const owner = auth.use('api').user!
             const query = PropertyTenant.query()
             .select(['id','property_id'])
-            .distinct(['property_id'])
+            //.distinct(['property_id'])
             .where((q)=>q.whereRaw('property_owner_id = ? AND payment_status != ?',[owner.id,'unpaid']))
             .preload('propertyInfo',(property)=>{
                 property.select('*')
@@ -221,11 +221,13 @@ export default class PropertiesController {
             const data = await query.orderBy('created_at','desc').paginate(page || 1, perPage || 10)
             const properties:Array<any> = []
             for(const item of data){
-                properties.push({
-                    ...item.propertyInfo.$attributes,
-                    mediaItems: item.propertyInfo.mediaItems,
-                    currency: item.propertyInfo.currency
-                })
+                if(properties.findIndex((e)=>e.propertyInfo.id) < 0){
+                    properties.push({
+                        ...item.propertyInfo.$attributes,
+                        mediaItems: item.propertyInfo.mediaItems,
+                        currency: item.propertyInfo.currency
+                    })
+                }
             }
             return sendSuccess(response,{
                 message:"Rented properties",
