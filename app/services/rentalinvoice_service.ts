@@ -36,6 +36,9 @@ export default class RentalInvoiceService {
         next_payment_date: nextPaymentDate as any,
         invoice_number: `inv-${cuid()}`
     })
+
+    await PropertyTenant.query().where('id','=',tenant_id).update('payment_next_due_date',nextPaymentDate)
+  
   }
 
 
