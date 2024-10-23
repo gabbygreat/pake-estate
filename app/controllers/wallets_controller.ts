@@ -133,7 +133,9 @@ export default class WalletsController {
             const dataQuery = WalletPayment.query()
             .select('*')
             .where('wallet_id','=',input.wallet_id!)
-
+            .preload('currency',(currency)=>{
+                currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+            })
             if(input.status && input.status !== undefined && input.status !== 'undefined' && input.status !== 'null' && input.status !== null){
                 dataQuery.andWhere('payment_status','=',input.status)
             }
