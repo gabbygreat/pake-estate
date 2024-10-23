@@ -134,13 +134,13 @@ export default class WalletsController {
             .select('*')
             .where('wallet_id','=',input.wallet_id!)
 
-            if(input.status && input.status !== undefined && input.status !== 'undefined'){
+            if(input.status && input.status !== undefined && input.status !== 'undefined' && input.status !== 'null' && input.status !== null){
                 dataQuery.andWhere('payment_status','=',input.status)
             }
-            if(input.search && input.search !== undefined && input.search !== 'undefined'){
+            if(input.search && input.search !== undefined && input.search !== 'undefined' && input.search !== 'null' && input.search !== null){
                 dataQuery.andWhere((q)=>q.whereRaw(`description % ?`,[input.search!]))
             }
-            if(input.start && input.start !== undefined && input.end && input.end !== undefined){
+            if(input.start && input.start !== undefined && input.end && input.end !== undefined && input.end !== 'null' && input.end !== null && input.start !== 'null' && input.start !== null){
                 dataQuery.andWhereBetween('updated_at',[input.start,input.end])
             }
             if(input.type){
