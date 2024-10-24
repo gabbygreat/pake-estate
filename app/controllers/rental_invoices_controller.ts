@@ -188,4 +188,43 @@ export default class RentalInvoicesController {
             return sendError(response,{message:"Rental Invoices", code: 500}) 
         }
     }
+
+
+    async userInvoices({ request, response}:HttpContext){
+        try {
+            interface Filter{
+                search?: string,
+                tenant_id?: string,
+                status?:'unpaid'|'paid'|'overdue',
+                page?: number
+                perPage?:number
+            }
+            const input:Filter = request.qs()
+
+            const invoicesQuery = RentalInvoice.query()
+            .select('*')
+            .where('tenant_id','=',input.tenant_id!)
+            .preload('property',(property)=>{
+                property.select(['general_renewal_cycle','property_title'])
+            })
+            .preload('currency',(currency)=>{
+                currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+            })
+            if(input.search && input.search != undefined && input.search != 'undefined'){
+                invoicesQuery.join('properties','rental_invoices.property_id','=','properties.id')
+                .where((q)=>q.whereRaw(`property_title % ?`,[input.search!]))
+            }
+            
+            if(input.status){
+                invoicesQuery.andWhere('rental_invoices.status','=',input.status)
+            }
+            const invoices = await invoicesQuery.orderBy('created_at','desc').paginate(input.page || 1, input.perPage || 20)
+            return sendSuccess(response,{
+                message:"Rental Invoices",
+                data: invoices
+            })
+        } catch {
+            return sendError(response,{message:"Rental Invoices", code: 500})
+        }
+    }
 }
