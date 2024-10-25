@@ -208,7 +208,7 @@ export default class PropertiesController {
             const query = PropertyTenant.query()
             .select(['id','property_id'])
             .distinctOn('property_id')
-            .orderBy('property_id')
+            //.orderBy('property_id')
             .where((q)=>q.whereRaw('property_owner_id = ? AND payment_status != ?',[owner.id,'unpaid']))
             .preload('propertyInfo',(property)=>{
                 property.select('*')
@@ -219,7 +219,10 @@ export default class PropertiesController {
                     currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
                 })
             })
-            const data = await query.orderBy('created_at','desc').paginate(page || 1, perPage || 10)
+            const data = await query
+            .orderBy(['property_id'])
+            .orderBy('created_at','desc')
+            .paginate(page || 1, perPage || 10)
             const properties:Array<any> = []
             for(const item of data){
                // if(properties.findIndex((e)=>e.propertyInfo.id) < 0){

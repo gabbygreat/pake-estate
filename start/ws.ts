@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 //import app from '@adonisjs/core/services/app'
 import ws_service from '#services/ws_service'
 import Message from '#models/message'

@@ -16,7 +16,7 @@ export default class MessagesController {
             files.forEach((e)=>fileUploads.push({url:e.name, type: e.fileType}))
             return sendSuccess(response,{message:'File upload success', data: fileUploads})
         } catch (error) {
-            
+            return sendError(response,{message:error.message,code:500})
         }
     }
 
@@ -41,7 +41,7 @@ export default class MessagesController {
                 return sendError(response,{message:"Delete operation failed", code:403})
             }
         } catch (error) {
-            
+            return sendError(response,{message:error.message,code:500})
         }
     }
 }
