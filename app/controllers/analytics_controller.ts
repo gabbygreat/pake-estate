@@ -6,7 +6,7 @@ import RentalInvoice from '#models/rental_invoice'
 
 export default class AnalyticsController {
 
-    async propertyAnalytics({ request,auth,response }:HttpContext){
+    async propertyAnalytics({ auth,response }:HttpContext){
         try {
             const user = auth.use('api').user!
             const totalProperties = await Property.query().where('owner_id','=',user.id).select(['id'])
