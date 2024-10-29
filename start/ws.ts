@@ -68,6 +68,10 @@ const io = ws_service.io
         }
       })
 
+      socket.on('echo',()=>{
+        io.to(socket.id).emit('echo',{message:'Server is Active!'})
+      })
+
     })
 
     //TODO::HANDLE DISCONNECTION AND FREEING ROOMS
