@@ -295,4 +295,35 @@ export default class UsersController {
         }
     }
 
+   async updateProfile({ request, auth, response }: HttpContext) {
+     try{
+        const user = auth.user
+        if (!user) {
+         return response.unauthorized({ message: "User not authorized" })
+     }
+        // Directly merge request data without validation
+     user.merge(request.only([
+      'firstname',
+      'lastname',
+      'email',
+      'phone_number',
+      'register_source',
+      'house_number',
+      'street_name',
+      'city',
+      'postal_code',
+      'country',
+      'profile_picture',
+      'email_verified',
+      'email_verified_at'
+    ]))
+
+     await user.save()
+
+        return response.ok({ message: "User profile updated successfully", user })
+        }catch (error) {
+            return sendError(response,{message: error.message})
+        }
+     }
+  
 }
