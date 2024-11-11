@@ -9,7 +9,7 @@ export default class RentalInvoiceService {
     const {fees, property_id, applicant_id} = await this.invoiceFees(tenant_id)
     let totalAmount = 0
     fees.forEach((e)=>{
-        totalAmount += e.amount - ((e.discount/100) * e.amount)
+        totalAmount += e.amount - ((Number(e.discount)/100) * Number(e.amount))
     })
     const property = await Property.query()
     .select(['general_renewal_cycle','currency_id']).where('id','=',property_id)

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { randomBytes } from 'crypto'
 // import app from "@adonisjs/core/services/app";
 // import { unlink } from "fs/promises";
@@ -89,7 +91,7 @@ export function sendError(
   export async function ValidateHandler(handler:()=>void,response:Response){
     try {
       handler()
-    } catch (error) {
+    } catch {
       console.log("HERE IS THE ERROR")
       return sendError(response,{message:''})
     }
@@ -99,3 +101,11 @@ export function sendError(
   export function lowerCase(text:string){
     return text.toLowerCase()
   }
+
+  export function generateOTP(length = 6) {
+    let otp = '';
+    for (let i = 0; i < length; i++) {
+        otp += Math.floor(Math.random() * 10); // Random digit between 0 and 9
+    }
+    return otp;
+}

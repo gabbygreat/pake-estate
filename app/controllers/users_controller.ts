@@ -201,14 +201,15 @@ export default class UsersController {
     async forgotPasswordRequest({request,response}:HttpContext){
         try {
             const { email } = request.params()
+            const mobileFlag = request.header('x-mobile-flag')
             const user = await User.findBy('email',lowerCase(email))
             if(user){
                 if(!user.email_verified){
-                    const prevOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification'})
-                    await this.emailService.setTemplate<VerificationEmail>('email_verification',
+                    const prevOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification',for_mobile_client: mobileFlag ? true : false})
+                    await this.emailService.setTemplate<VerificationEmail>(mobileFlag ? 'otp_email_verification':'email_verification',
                         {
                             firstname:user.firstname!,
-                            verification_url:`${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${prevOTP}`
+                            verification_url: mobileFlag ? prevOTP : `${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${prevOTP}`
                         }).sendMail({
                             subject:'Email Verification',
                             to: email,
@@ -229,11 +230,15 @@ export default class UsersController {
                             })
                       return sendSuccess(response,{message:'Password reset OTP already sent'})
                     }else{
-                        const prevOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'password_reset'})
-                        await this.emailService.setTemplate<ForgotPasswordEmail>('forgot_password',
+                        const prevOTP = await this.otpService.genRedisCode({
+                            user_id:user.id,
+                            code_type:'password_reset',
+                            for_mobile_client: mobileFlag ? true : false
+                        })
+                        await this.emailService.setTemplate<ForgotPasswordEmail>(mobileFlag ? 'otp_forgot_password':'forgot_password',
                             {
                                 firstname:user.firstname!,
-                                otp_url:`${env.get('WEBSITE_URL')}/verification?type=forgot-password&email=${email}&token=${prevOTP}`
+                                otp_url: mobileFlag ? prevOTP : `${env.get('WEBSITE_URL')}/verification?type=forgot-password&email=${email}&token=${prevOTP}`
                             }).sendMail({
                                 subject:'Forgot Password',
                                 to: email,

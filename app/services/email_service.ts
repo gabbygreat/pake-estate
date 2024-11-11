@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import mail from "@adonisjs/mail/services/main"
 import env from "#start/env"
-type EmailTemplate = 'welcome_email'|'forgot_password'|'email_verification'
+type EmailTemplate = 'welcome_email'|'forgot_password'|'email_verification'|'otp_email_verification'|'otp_forgot_password'
 export interface WelcomeEmail {
     firstname: string
 }
