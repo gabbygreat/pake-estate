@@ -9,8 +9,6 @@ export default class SaveMessageEvent {
                 sender_id: message.sender_id,
                 receiver_id: message.receiver_id
             })
-          } catch (error) {
-            
-          }
+          } catch {/** */}
     }
 }

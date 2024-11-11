@@ -44,7 +44,7 @@ const io = ws_service.io
 
 
     io?.on('connection', (socket) => {
-
+      console.log(socket.id)
       socket.on('login',({userId}:{userId:string})=>{
         socket.join(userId)
       })
