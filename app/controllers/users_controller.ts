@@ -39,17 +39,17 @@ export default class UsersController {
                 //Create account
                 const user = await User.create({firstname,lastname,email:lowerCase(email),password,phone_number},{client})
                 //Generate Email verification code
-                const verificationOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification'})
-                console.log(verificationOTP)
-                /*await this.emailService.setTemplate<VerificationEmail>('email_verification',
+                const mobileFlag = request.header('x-mobile-flag')
+                const verificationOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification',for_mobile_client: mobileFlag ? true : false})
+                await this.emailService.setTemplate<VerificationEmail>(mobileFlag ? 'otp_email_verification':'email_verification',
                     {
                         firstname,
-                        verification_url:`${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${verificationOTP}`
+                        verification_url: mobileFlag ? verificationOTP : `${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${verificationOTP}`
                     }).sendMail({
                         subject:'Email Verification',
                         to: email,
                         from: 'Pake Estate Management'
-                    })*/
+                    })
                 return sendSuccess(response,{message:'Account created successfully',data:{...user.$attributes,password:'****'}})
             })
         } catch (error) {
@@ -68,16 +68,17 @@ export default class UsersController {
         try {
             const { email } = request.params()
             const user = await User.findBy('email',lowerCase(email))
+            const mobileFlag = request.header('x-mobile-flag')
            if(user){
             const prevOTP = await this.otpService.getRedisCode({user_id:user.id,code_type:'email_verification'})
             if(prevOTP){
                 return sendSuccess(response,{message:'Please use the link already sent to your email'})
             }else{
-                const verificationOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification'})
-                await this.emailService.setTemplate<VerificationEmail>('email_verification',
+                const verificationOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification',for_mobile_client: mobileFlag ? true : false})
+                await this.emailService.setTemplate<VerificationEmail>(mobileFlag ? 'otp_email_verification': 'email_verification',
                     {
                         firstname:user.firstname!,
-                        verification_url:`${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${verificationOTP}`
+                        verification_url: mobileFlag ? verificationOTP : `${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${verificationOTP}`
                     }).sendMail({
                         subject:'Email Verification',
                         to: email,
@@ -114,6 +115,7 @@ export default class UsersController {
         try {
             await request.validateUsing(createLoginValidator)
             const { email, password } = request.body()
+            const mobileFlag = request.header('x-mobile-flag')
             const user = await User.verifyCredentials(lowerCase(email),password)
             if (user){
                 if(!user.email_verified){
@@ -121,11 +123,11 @@ export default class UsersController {
                     if(prevOTP){
                         return sendSuccess(response,{message:'Please use the link already sent to your email'})
                     }else{
-                        const verificationOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification'})
-                        await this.emailService.setTemplate<VerificationEmail>('email_verification',
+                        const verificationOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification',for_mobile_client: mobileFlag ? true : false})
+                        await this.emailService.setTemplate<VerificationEmail>(mobileFlag ? 'otp_email_verification': 'email_verification',
                             {
                                 firstname:user.firstname!,
-                                verification_url:`${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${verificationOTP}`
+                                verification_url: mobileFlag ? verificationOTP : `${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${verificationOTP}`
                             }).sendMail({
                                 subject:'Email Verification',
                                 to: email,
