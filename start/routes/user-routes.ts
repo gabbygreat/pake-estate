@@ -26,4 +26,5 @@ router.group(()=>{
 
     router.put('update-profile',[UsersController,'updateProfile']).use(middleware.auth({guards:['api']}))
 
+    router.put('change-password',[UsersController,'changePassword']).use(middleware.auth({guards:['api']}))
 }).prefix('/user')

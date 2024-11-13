@@ -13,6 +13,7 @@ import EmailService ,{VerificationEmail,ForgotPasswordEmail} from '#services/ema
 import env from '#start/env'
 import Notification from '#models/notification'
 import { lowerCase } from '../utils.js'
+import FileUploadService from '#services/fileupload_service'
 
 @inject()
 export default class UsersController {
@@ -312,12 +313,25 @@ export default class UsersController {
       'street_name',
       'city',
       'postal_code',
-      'country',
-      'profile_picture',
-      'email_verified',
-      'email_verified_at'
+      'country'
     ]))
+       // Initialize the file upload service
+       const fileUploadService = new FileUploadService();
 
+       // Upload profile picture if provided
+       const profilePic = request.file('profile_picture');
+       if (profilePic) {
+         // Use the upload service to store the profile picture and get the URL
+         const profilePictureUrl = await fileUploadService.uploadStaticMediaFiles(
+           request,
+           'profile_picture',   // Field name in the form
+           'profile_pictures'    // Destination folder in the storage
+         );
+   
+         // Update user profile picture URL in the database
+         user.profile_picture = profilePictureUrl;
+       }
+      
      await user.save()
 
         return response.ok({ message: "User profile updated successfully", user })
@@ -325,5 +339,37 @@ export default class UsersController {
             return sendError(response,{message: error.message})
         }
      }
-  
+     async changePassword({ request, auth, response }: HttpContext) {
+        try{
+        // Get the authenticated user
+        const user = auth.use('api').user
+        if (!user) {
+            return sendError(response,{message:'User not Authorized'})
+        }
+    
+        const { oldPassword, newPassword, confirmPassword } =  request.body()
+        //check if new password matches the confirm password
+        if(newPassword !== confirmPassword){
+            return sendError(response,{message:'Both Password does not match'})
+        }
+    
+        // Verify the old password
+        //const isCurrentPasswordValid = (user.password, oldPassword)
+        if (user.password != oldPassword) {
+            console.log('henry')
+            return sendError(response,{message:'Old Password is Incorrect'})
+        }
+        //check if both old and new passwords are the same
+      // const formerPassword = (user.password, newPassword)
+        if(user.password === oldPassword){
+            return sendError(response,{message:'New Password cannot be the same with Old Password'})
+        }
+        //check if password matches the new password, then save
+        user.password = newPassword
+            await user.save()
+            return sendSuccess(response,{message:'Password successfully changed'})
+      }catch (error) {
+        return sendError(response,{message: error.message})
+    }
+}
 }
