@@ -13,6 +13,7 @@ import EmailService ,{VerificationEmail,ForgotPasswordEmail} from '#services/ema
 import env from '#start/env'
 import Notification from '#models/notification'
 import { lowerCase } from '../utils.js'
+import hash from '@adonisjs/core/services/hash'
 import FileUploadService from '#services/fileupload_service'
 
 @inject()
@@ -298,7 +299,7 @@ export default class UsersController {
 
    async updateProfile({ request, auth, response }: HttpContext) {
      try{
-        const user = auth.user
+        const user = auth.use('api').user
         if (!user) {
          return response.unauthorized({ message: "User not authorized" })
      }
@@ -354,20 +355,17 @@ export default class UsersController {
         }
     
         // Verify the old password
-        //const isCurrentPasswordValid = (user.password, oldPassword)
-        if (user.password != oldPassword) {
-            console.log('henry')
+        const oldHash = await hash.verify(user.password,oldPassword)
+        if (!oldHash) {
             return sendError(response,{message:'Old Password is Incorrect'})
         }
-        //check if both old and new passwords are the same
-      // const formerPassword = (user.password, newPassword)
         if(user.password === oldPassword){
             return sendError(response,{message:'New Password cannot be the same with Old Password'})
         }
         //check if password matches the new password, then save
         user.password = newPassword
-            await user.save()
-            return sendSuccess(response,{message:'Password successfully changed'})
+        await user.save()
+        return sendSuccess(response,{message:'Password successfully changed'})
       }catch (error) {
         return sendError(response,{message: error.message})
     }
