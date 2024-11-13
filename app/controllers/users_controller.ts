@@ -23,7 +23,8 @@ export default class UsersController {
          protected otpService:OTPService,
          protected loginService:LoginService,
          protected emailService:EmailService,
-         protected noticeService:NotificationService
+         protected noticeService:NotificationService,
+         protected fileUpload:FileUploadService
     ){}
 
     async register({request,response}:HttpContext){
@@ -304,26 +305,22 @@ export default class UsersController {
          return response.unauthorized({ message: "User not authorized" })
      }
         // Directly merge request data without validation
-     user.merge(request.only([
-      'firstname',
-      'lastname',
-      'email',
-      'phone_number',
-      'register_source',
-      'house_number',
-      'street_name',
-      'city',
-      'postal_code',
-      'country'
-    ]))
-       // Initialize the file upload service
-       const fileUploadService = new FileUploadService();
-
+        user.merge(request.only([
+        'firstname',
+        'lastname',
+        'email',
+        'phone_number',
+        'house_number',
+        'street_name',
+        'city',
+        'postal_code',
+        'country'
+        ]))
        // Upload profile picture if provided
        const profilePic = request.file('profile_picture');
        if (profilePic) {
          // Use the upload service to store the profile picture and get the URL
-         const profilePictureUrl = await fileUploadService.uploadStaticMediaFiles(
+         const profilePictureUrl = await this.fileUpload.uploadStaticMediaFiles(
            request,
            'profile_picture',   // Field name in the form
            'profile_pictures'    // Destination folder in the storage
@@ -340,6 +337,8 @@ export default class UsersController {
             return sendError(response,{message: error.message})
         }
      }
+
+
      async changePassword({ request, auth, response }: HttpContext) {
         try{
         // Get the authenticated user
