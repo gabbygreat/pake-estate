@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { HttpContext } from '@adonisjs/core/http'
@@ -11,15 +13,15 @@ import { createReviewValidator } from '#validators/review'
 import { inject } from '@adonisjs/core'
 import PropertyLegalRequirement from '#models/property_legal_requirement'
 import PropertyTenant from '#models/property_tenant'
-//import { savePropertyValidator } from '#validators/property'
 import SavedProperty from '#models/saved_property'
-
+import LoginService from '#services/login_service'
 
 @inject()
 export default class PropertiesController {
     constructor(
          protected uploadService:FileUploadService,
-         protected propertyService:PropertyService
+         protected propertyService:PropertyService,
+         protected loginService: LoginService
     ){}
 
     async composeProperty({request,response,auth}:HttpContext){
@@ -95,6 +97,8 @@ export default class PropertiesController {
                 minPrice?:number
                 location?:string
                 propertyType?:string
+                listingType?:'sale'|'rent',
+                currency?:string
             }
             const input:Filter = request.qs()
             const query = Property.query()
@@ -123,7 +127,9 @@ export default class PropertiesController {
             if(input.forReview && (input.forReview === true || input.forReview === 'true')){
                 query.orderBy('total_reviews', 'desc')
             }
-
+            if(input.listingType){
+                query.andWhere('listing_type','=',input.listingType)
+            }
             if(input.bedrooms && input.bedrooms !== null && input.bedrooms !== 'undefined' as any && input.bedrooms !== undefined){
                 if(input.bedrooms == 5){
                     query.andWhere('bedrooms','>=',input.bedrooms)
@@ -158,7 +164,9 @@ export default class PropertiesController {
                     query.andWhere((q)=>q.whereRaw(`country % ?`,[country]))
                 }
             }
-
+            if(input.currency && input.currency !== undefined && input.currency !== 'undefined'){
+                query.andWhere('currency_id','=',input.currency)
+            }
             if(input.latitude && input.longitude){
                 const {maxLat,maxLng,minLat,minLng} = calculateBoundingBox(input.latitude,input.longitude,5)//5KM AREA
                 const locationQuery = gisQuery({
@@ -170,22 +178,81 @@ export default class PropertiesController {
                 query.andWhere((q)=>{q.whereRaw(locationQuery)})
             }
             const data = await query.paginate(input.page ?? 1, input.perPage ?? 20)
-            return sendSuccess(response,{message:"Property listing", data})
+            const processedData:Array<any> = []
+            
+            const user = await this.loginService.loggedInUser(auth)
+            for(const item of data){
+                processedData.push({
+                    ...item.$attributes,
+                    mediaItems:item.mediaItems,
+                    currency:item.currency,
+                    //@ts-ignore
+                    isSaved:user ? await this.propertyService.isSavedProperty(user.id,item.id) : false
+                })
+            }
+            return sendSuccess(response,{message:"Property listing", data:
+                {
+                  properties:processedData,
+                  meta: data.getMeta()  
+                }
+            })
         } catch (error) {
             return sendError(response,{message:error.message,code:500})
         }
     }
 
-    public async propertyInfo({request,response}:HttpContext){
+    public async rentedProperties({ request,auth,response }:HttpContext){
+        try {
+            const { page,perPage } = request.qs()
+            const owner = auth.use('api').user!
+            const query = PropertyTenant.query()
+            .select(['id','property_id'])
+            .distinctOn('property_id')
+            //.orderBy('property_id')
+            .where((q)=>q.whereRaw('property_owner_id = ? AND payment_status != ?',[owner.id,'unpaid']))
+            .preload('propertyInfo',(property)=>{
+                property.select('*')
+                .preload('mediaItems',(media)=>{
+                    media.select(['id','media_url','media_type'])
+                })
+                .preload('currency',(currency)=>{
+                    currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+                })
+            })
+            const data = await query
+            .orderBy(['property_id'])
+            .orderBy('created_at','desc')
+            .paginate(page || 1, perPage || 10)
+            const properties:Array<any> = []
+            for(const item of data){
+               // if(properties.findIndex((e)=>e.propertyInfo.id) < 0){
+                    properties.push({
+                        ...item.propertyInfo.$attributes,
+                        mediaItems: item.propertyInfo.mediaItems,
+                        currency: item.propertyInfo.currency
+                    })
+                //}
+            }
+            return sendSuccess(response,{
+                message:"Rented properties",
+                data:{
+                    properties,
+                    meta:data.getMeta()
+                }
+            })
+        } catch (error) {
+            console.log(error)
+            return sendError(response,{message:"Error fetching rented properties"})
+        }
+    }
+
+    public async propertyInfo({request,auth,response}:HttpContext){
         try {
             const {id} = request.params()
             const data = await Property.query().select('*')
             .preload('amenities',(am)=>{
                 am.select(['id','name'])
             })
-            // .preload('documents',(dc)=>{
-            //     dc.select('*')
-            // })
             .preload('fees',(fee)=>{
                 fee.select(['id','name','amount'])
             })
@@ -205,7 +272,20 @@ export default class PropertiesController {
                 media.select(['id',"media_url","media_type"])
             }).where('id','=',id)
            if(data){
-            return sendSuccess(response,{data:data[0],message:"Property information"})
+            const user = await this.loginService.loggedInUser(auth)
+            const d:Partial<Property> = {
+                ...data[0].$attributes,
+                amenities:data[0].amenities,
+                fees:data[0].fees,
+                legalRequirements:data[0].legalRequirements,
+                owner:data[0].owner,
+                utilities:data[0].utilities,
+                currency:data[0].currency,
+                mediaItems:data[0].mediaItems,
+                //@ts-ignore
+                isSaved:user ? await this.propertyService.isSavedProperty(user.id,data[0].id) : false
+            }
+            return sendSuccess(response,{data:d,message:"Property information"})
            }else{
             return sendError(response,{message:"Property not found",code:404})
            }
@@ -433,32 +513,27 @@ export default class PropertiesController {
             return sendError(response, { message: 'Unauthorized', code: 401 })
         }
         const { property_id } = request.body()
-        const property = await Property.find(property_id)
-        if (!property) {
-                return sendError(response, { message: 'Property not found', code: 404 })
-            }
-        // check if the property has been saved
-          const existingSave = await SavedProperty
-          .query()
-          .select(['id'])
-          .where("user_id","=",user.id)
-          .andWhere ('property_id',"=", property_id)
-          if (existingSave[0]) {
-            return sendError(response, { message: 'Property already saved', code: 400 })
-          }
-
-        // save the property
-          const savedProperty = await SavedProperty.create({
-            user_id: user.id,
-            property_id: property_id,
-          })
-          return sendSuccess(response, {
-            message: 'Property saved successfully',
-            data: savedProperty,
-          })
+        //check if the property has been saved
+        const existingSave = await SavedProperty
+        .query()
+        .select(['id'])
+        .where("user_id","=",user.id)
+        .andWhere ('property_id',"=", property_id)
+        if (existingSave[0]) {
+        await existingSave[0].delete()
+        return sendSuccess(response, { message: 'Updated' })
+        }
+        //save the property
+        const savedProperty = await SavedProperty.create({
+        user_id: user.id,
+        property_id: property_id,
+        })
+        return sendSuccess(response, {
+        message: 'Property saved successfully',
+        data: savedProperty,
+        })
        // await request.validateUsing(savePropertyValidator)
     }catch (error) {
-        console.log(error)
         // Handle validation errors or other errors
         return sendError(response, {
           message: 'Error saving property',
@@ -467,15 +542,135 @@ export default class PropertiesController {
         })
       } 
   }
-  async listSaveProperty({response, auth}:HttpContext){
+  async listSaveProperty({request,response, auth}:HttpContext){
     try {
         //const { property_id } = request.params()
         const user = auth.use('api').user
         if(!user){
             return sendError(response, { message: 'Unauthorized', code: 401 })
         }
-        const items = await SavedProperty.query().select('*').where('user_id','=',user.id).preload('propertyInfo')
-        return sendSuccess(response,{message:"Saved Properties",data:items})
+        interface Filter {
+            owner?:boolean|string //IF THIS IS OWNER,FETCH BOTH PUBLISHED AND UNPUBLISHED ELSE FETCH ONLY PUBLISHED
+            search?: string
+            forReview?:boolean|string,
+            sort?:'recent'|'oldest'
+            page?: number
+            perPage?:number,
+            latitude?:number,
+            longitude?:number,
+            bedrooms?:number,
+            bathrooms?:number,
+            maxPrice?:number,
+            minPrice?:number
+            location?:string
+            propertyType?:string
+            listingType?:'sale'|'rent',
+            currency?:string
+        }
+        const input:Filter = request.qs()
+        const itemsQuery =  SavedProperty.query().select('*')
+        .where('user_id','=',user.id)
+        .preload('propertyInfo',(item)=>{
+            item.select('*')
+            .preload('currency',(currency)=>{
+                currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+            })
+            .preload('mediaItems',(media)=>{
+                media.select(['id',"media_url","media_type"])
+            })
+        })
+        .preload('owner',(owner)=>{
+            owner.select('*') //TODO:OPTIMIZE
+        })
+        
+        itemsQuery.join('properties','properties.id','create_save_properties.property_id')
+        
+        if(input.search){
+            console.log('currency')
+            itemsQuery.andWhere((q)=>{
+                q.whereRaw('property_title % ? OR property_description % ?',Array(2).fill(input.search))
+            })
+        }
+        
+        if(input.owner && (input.owner === true || input.owner === 'true')){
+            const user = await auth.authenticate()
+            itemsQuery.andWhere('owner_id','=',user.id)
+        }else{
+            itemsQuery.andWhere('current_state','=','published').andWhere('hidden','=',false)
+        }
+
+        if(input.forReview && (input.forReview === true || input.forReview === 'true')){
+            itemsQuery.orderBy('total_reviews', 'desc')
+        }
+        if(input.listingType){
+            itemsQuery.andWhere('listing_type','=',input.listingType)
+        }
+        if(input.bedrooms && input.bedrooms !== null && input.bedrooms !== 'undefined' as any && input.bedrooms !== undefined){
+            if(input.bedrooms == 5){
+                itemsQuery.andWhere('bedrooms','>=',input.bedrooms)
+            }else{
+                itemsQuery.andWhere('bedrooms','=',input.bedrooms)
+            }
+        }
+        if(input.bathrooms && input.bedrooms !== null && input.bedrooms !== 'undefined' as any && input.bedrooms !== undefined){
+            itemsQuery.andWhere('bathrooms','=',input.bathrooms)
+        }
+        if(input.minPrice && !isNaN(input.minPrice)){
+            itemsQuery.andWhere('general_rent_fee','>=',Number(input.minPrice))
+        }
+        if(input.maxPrice && !isNaN(input.maxPrice)){
+            itemsQuery.andWhere('general_rent_fee','<=',Number(input.maxPrice))
+        }
+        if(input.propertyType && input.propertyType !== 'undefined' && input.propertyType !== undefined){
+            itemsQuery.andWhere('property_type','=',input.propertyType)
+        }
+        if(input.sort){
+            itemsQuery.orderBy('properties.created_at', input.sort === 'oldest' ? 'asc' : 'desc')
+        }
+        if(input.location && input.location != undefined && input.location !== 'undefined' && input.location !=''){
+            const [city,state,country] = input.location
+            if(city){
+                itemsQuery.andWhere((q)=>q.whereRaw(`city % ?`,[city]))
+            }
+            if(state){
+                itemsQuery.andWhere((q)=>q.whereRaw(`state % ?`,[state]))
+            }
+            if(country){
+                itemsQuery.andWhere((q)=>q.whereRaw(`country % ?`,[country]))
+            }
+        }
+        if(input.currency && input.currency !== undefined && input.currency !== 'undefined'){
+            itemsQuery.andWhere('currency_id','=',input.currency)
+        }
+        if(input.latitude && input.longitude){
+            const {maxLat,maxLng,minLat,minLng} = calculateBoundingBox(input.latitude,input.longitude,5)//5KM AREA
+            const locationQuery = gisQuery({
+                startLatitude:minLat,
+                startLongitude:minLng,
+                stopLatitude:maxLat,
+                stopLongitude:maxLng
+            })
+            itemsQuery.andWhere((q)=>{q.whereRaw(locationQuery)})
+        }
+
+       const items = await itemsQuery
+       .orderBy('create_save_properties.created_at','desc')
+       .paginate(input.page || 1, input.perPage || 20)
+       const properties:Array<any> = []
+        
+       for(const item of items){
+        const user = await this.loginService.loggedInUser(auth)
+         properties.push({
+            ...item.propertyInfo.$attributes,
+            owner:item.propertyInfo.owner,
+            currency:item.propertyInfo.currency,
+            mediaItems:item.propertyInfo.mediaItems,
+            //@ts-ignore
+            isSaved:user ? await this.propertyService.isSavedProperty(user.id,item.propertyInfo.id) : false
+        })
+       }
+        
+        return sendSuccess(response,{message:"Saved Properties",data:{properties,meta:items.getMeta()}})
     } catch (error) {
         return sendError(response,{message:error.message,code:500})
     }

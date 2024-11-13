@@ -13,7 +13,7 @@ export default class WalletPayment extends BaseModel {
   declare wallet_id: string
 
   @column()
-  declare amount_paid: string
+  declare amount_paid: number
 
   @column()
   declare description: string
@@ -25,7 +25,7 @@ export default class WalletPayment extends BaseModel {
   declare payment_status:'completed'|'pending'|'failed'
 
   @column()
-  declare transaction_type:'DEPOSIT'|'WITHDRAWAL'|'TRANSFER'
+  declare transaction_type:'DEPOSIT'|'WITHDRAWAL'|'TRANSFER'|'CREDIT'|'DEBIT'
 
   @column()
   declare payment_gateway: string

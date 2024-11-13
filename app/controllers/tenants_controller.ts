@@ -210,7 +210,7 @@ export default class TenantsController {
       const query = PropertyTenant.query()
         .select('*')
         .preload('propertyInfo', (property) => {
-          property.select(['id', 'property_title'])
+          property.select(['id', 'property_title','currency_id'])
           .preload('currency',(currency)=>{
             currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
         })
@@ -316,7 +316,7 @@ export default class TenantsController {
       const result = await PropertyTenant.query()
         .select('*')
         .preload('propertyInfo', (property) => {
-          property.select(['id', 'property_title'])
+          property.select(['id', 'property_title','currency_id'])
           .preload('currency',(currency)=>{
             currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
         })
@@ -435,7 +435,7 @@ export default class TenantsController {
           q.whereRaw('applicant_id = ? AND status = ?', [tenant?.id, 'approved'])
         })
         .preload('propertyInfo', (property) => {
-          property.select(['property_title'])
+          property.select(['property_title','currency_id'])
           .preload('currency',(currency)=>{
             currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
         })

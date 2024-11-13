@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 //import app from '@adonisjs/core/services/app'
 import ws_service from '#services/ws_service'
 import Message from '#models/message'
@@ -43,7 +44,7 @@ const io = ws_service.io
 
 
     io?.on('connection', (socket) => {
-
+      console.log(socket.id)
       socket.on('login',({userId}:{userId:string})=>{
         socket.join(userId)
       })
@@ -65,6 +66,10 @@ const io = ws_service.io
         }else{
             io.to(stat.senderId).emit("online_status",{status:false})
         }
+      })
+
+      socket.on('echo',()=>{
+        io.to(socket.id).emit('echo',{message:'Server is Active!'})
       })
 
     })

@@ -3,6 +3,7 @@ import { BaseModel, column,hasMany,hasOne } from '@adonisjs/lucid/orm'
 import type { HasMany , HasOne} from '@adonisjs/lucid/types/relations'
 import RentalInvoicePayment from './rental_invoice_payment.js'
 import Property from './property.js'
+import Currency from './currency.js'
 export default class RentalInvoice extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
@@ -48,4 +49,7 @@ export default class RentalInvoice extends BaseModel {
 
   @hasOne(()=>Property,{foreignKey:'id', localKey:'property_id'})
   declare property:HasOne<typeof Property>
+
+  @hasOne(()=>Currency,{foreignKey:'id', localKey:'currency_id'})
+  declare currency:HasOne<typeof Currency>
 }

@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
-import type { HasOne } from '@adonisjs/lucid/types/relations'
-import { hasOne } from '@adonisjs/lucid/orm'
+import type { HasOne,BelongsTo } from '@adonisjs/lucid/types/relations'
+import { hasOne,belongsTo } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { hasMany } from '@adonisjs/lucid/orm'
 import User from './user.js'
@@ -137,7 +137,7 @@ export default class Property extends BaseModel {
   declare manager_contact_details: string
 
   @column()
-  declare currency_id: string
+  declare currency_id: string | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -175,6 +175,6 @@ export default class Property extends BaseModel {
   @hasMany(()=>PropertyReview,{foreignKey:'property', localKey:'id'})
   declare reviews:HasMany<typeof PropertyReview>
 
-  @hasOne(()=>Currency,{foreignKey:'id', localKey:'currency_id'})
-  declare currency:HasOne<typeof Currency>
+  @belongsTo(()=>Currency,{foreignKey:'currency_id', localKey:'id'})
+  declare currency:BelongsTo<typeof Currency>
 }

@@ -1,3 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable prefer-const */
+/* eslint-disable no-fallthrough */
+/* eslint-disable no-case-declarations */
 import type { HttpContext } from '@adonisjs/core/http'
 import emitter from '@adonisjs/core/services/emitter';
 import { sendError, sendSuccess } from "../utils.js";
@@ -7,6 +13,7 @@ import Wallet from '#models/wallet';
 import db from '@adonisjs/lucid/services/db';
 import WalletService, { WebHookAccRef, WebHookObject } from '#services/wallet_service';
 import { inject } from '@adonisjs/core';
+import WalletPayment from '#models/wallet_payment';
 
 @inject()
 export default class WalletsController {
@@ -21,7 +28,7 @@ export default class WalletsController {
         try {
             const user = auth.use('api').user
 
-            const { wallet_id, payment_method, amount } = request.body()
+            const { wallet_id, payment_method, amount, success_url,error_url } = request.body()
             const wallet = await Wallet.query()
             .select('*').whereRaw('id = ? AND user_id = ?',[wallet_id,user?.id!])
             .preload('currency',(currency)=>{
@@ -37,7 +44,13 @@ export default class WalletsController {
                         transaction_type:'DEPOSIT'
                     })
                     if(ref){
-                        const {error,data} = await this.walletService.createStripePaymentLink(amount,wallet[0].currency.code,ref,user?.email!)
+                        const {error,data} = await this.walletService.createStripePaymentLink(
+                            amount,wallet[0].currency.code,
+                            ref,
+                            user?.email!,
+                            success_url,
+                            error_url
+                        )
                         if(!error){
                             return sendSuccess(response,{message:"Payment link generated", data})
                         }
@@ -54,8 +67,12 @@ export default class WalletsController {
         try {
             const { currencyId } = request.params()
             const user = auth.use('api').user!
-            const walletBalance = await Wallet.query()
+
+            let walletBalance = await Wallet.query()
             .select(['id','balance']).where((q)=>q.whereRaw(`currency_id = ? AND user_id = ?`,[currencyId,user.id]))
+            if(!walletBalance[0]){
+                walletBalance[0] = await Wallet.create({user_id:user?.id,currency_id:currencyId,balance:0})
+            }
             const query = await db.rawQuery(`
                 SELECT
                     (SELECT SUM(amount_paid)
@@ -63,21 +80,22 @@ export default class WalletsController {
                     WHERE currency_id = '${currencyId}'
                     AND payment_status = 'completed'
                     AND wallet_id = '${walletBalance[0].id}'
-                    AND transaction_type = 'DEPOSIT') AS total_received,
+                    AND transaction_type = 'DEPOSIT' OR transaction_type='CREDIT') AS total_received,
 
                     (SELECT SUM(amount_paid)
                     FROM wallet_payments
                     WHERE currency_id = '${currencyId}'
                     AND payment_status = 'completed'
                     AND wallet_id = '${walletBalance[0].id}'
-                    AND (transaction_type = 'WITHDRAW' OR transaction_type='TRANSFER')) AS total_sent;
+                    AND (transaction_type = 'WITHDRAWAL' OR transaction_type='TRANSFER' OR transaction_type='DEBIT')) AS total_sent;
 
         `)
         const balances = query.rows[0]
         balances.total_received = Number(balances.total_received)
         balances.total_sent = Number(balances.total_sent)
-        return sendSuccess(response,{message:"Wallet Balance", data:balances})
+        return sendSuccess(response,{message:"Wallet Balance", data:{balances,wallet:walletBalance[0]}})
         } catch (error) {
+            console.log(error)
             return sendError(response,{message:"Error fetching wallet balance info", code:500})
         }
     }
@@ -98,13 +116,44 @@ export default class WalletsController {
     //     }
     // }
 
-    // async transactionHistory({ request,auth,response}:HttpContext){
-    //     try {
-            
-    //     } catch (error) {
-            
-    //     }
-    // }
+    async transactionHistory({ request,response}:HttpContext){
+        try {
+            //const user = auth.use('api').user!
+            interface Filter{
+                wallet_id?:string,
+                status?: string
+                search?: string
+                type?: string
+                start?:string
+                end?:string,
+                page?:number
+                perPage?:number
+            }
+            const input:Filter = request.qs()
+            const dataQuery = WalletPayment.query()
+            .select('*')
+            .where('wallet_id','=',input.wallet_id!)
+            .preload('currency',(currency)=>{
+                currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+            })
+            if(input.status && input.status !== undefined && input.status !== 'undefined' && input.status !== 'null' && input.status !== null){
+                dataQuery.andWhere('payment_status','=',input.status)
+            }
+            if(input.search && input.search !== undefined && input.search !== 'undefined' && input.search !== 'null' && input.search !== null){
+                dataQuery.andWhere((q)=>q.whereRaw(`description % ?`,[input.search!]))
+            }
+            if(input.start && input.start !== undefined && input.end && input.end !== undefined && input.end !== 'null' && input.end !== null && input.start !== 'null' && input.start !== null){
+                dataQuery.andWhereBetween('updated_at',[input.start,input.end])
+            }
+            if(input.type){
+                dataQuery.andWhere('transaction_type','=',input.type)
+            }
+            const data = await dataQuery.orderBy('created_at','desc').paginate(input.page || 1,input.perPage)
+            return sendSuccess(response,{message:"Transaction History", data})
+        } catch (error) {
+            return sendError(response,{message:"Failed to fetch payment history", code:500})
+        }
+    }
 
     async supportedCurrency({ auth,response }:HttpContext){
         try {
@@ -116,7 +165,6 @@ export default class WalletsController {
                 const check = await ClientCurrency.query().select(['id','default_currency']).where((q)=>q.whereRaw('currency_id = ? AND user_id = ?',[c.id,user.id]))
                 if(!check[0]){
                     await ClientCurrency.create({currency_id:c.id,user_id:user.id,supported:true})
-                    await Wallet.create({currency_id:c.id,balance:0,user_id:user.id})
                 }
             }
             //Make one default if none for the user

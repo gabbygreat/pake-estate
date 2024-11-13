@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Notification from "#models/notification"
 
 export default class NotificationService {
@@ -30,13 +31,28 @@ export default class NotificationService {
                     message: `Your rental application for ${property_name} has been cancelled. If you did not initiate this, please contact support.`,
                     type: 'warning'              }
             },
-            "RENTAL_PAYMENT_NOTIFICATION": ({property_name,date}:{property_name:string,date:any}) => {
+            "RENTAL_PAYMENT_DUE_NOTIFICATION": ({property_name,date}:{property_name:string,date:any}) => {
                 return { 
                     title: `Rental Payment Due`, 
                     message: `This is a reminder that your rental payment for ${property_name} is due on ${date as any}. Please ensure payment is made on time to avoid penalties.`,
                     type: 'reminder'      
                 }        
             },
+            "RENTAL_PAYMENT_NOTIFICATION_FOR_LANDLORD": ({property_name, tenant_name, date}:{property_name:string, tenant_name:string, date:any}) => {
+                return {
+                    title: `Rental Payment Received`,
+                    message: `Good news! The rental payment for your property, ${property_name}, from tenant ${tenant_name} has been successfully received on ${date}. Thank you for your continued partnership.`,
+                    type: 'success'
+                };
+            },
+            "RENTAL_PAYMENT_NOTIFICATION_FOR_TENANT": ({property_name, date}:{property_name:string, date:any}) => {
+                return {
+                    title: `Rental Payment Confirmation`,
+                    message: `Thank you! Your rental payment for ${property_name} has been received on ${date}. We appreciate your timely payment.`,
+                    type: 'confirmation'
+                };
+            },
+
             "NEW_REVIEW_NOTIFICATION": ({property_name}:{property_name:string}) => {
                 return {
                     title: `New Review Received`,

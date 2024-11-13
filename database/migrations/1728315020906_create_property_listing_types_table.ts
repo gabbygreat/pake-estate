@@ -6,7 +6,7 @@ export default class extends BaseSchema {
   async up() {
     this.schema.alterTable(this.tableName, (table) => {
       table.string('listing_type').defaultTo('rent')
-      table.uuid('currency_id').references('id').inTable('currencies')
+      table.uuid('currency_id').references('id').inTable('currencies').defaultTo(null)
     })
   }
 

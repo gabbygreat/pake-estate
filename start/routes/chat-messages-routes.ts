@@ -5,5 +5,8 @@ router.group(()=>{
 
     router.post('upload-files',[MessagesController, 'handleFileUpload']).use(middleware.auth({guards:['api']}))
     router.delete('file/:chat_id/:file_name', [MessagesController, 'removeFile']).use(middleware.auth({guards:['api']}))
+    router.get('ref-user-data/:id',[MessagesController,'refUserData'])
+    router.get('ref-property-data/:id',[MessagesController,'refPropertyData'])
 
 }).prefix('/chat')
+

@@ -11,6 +11,7 @@ import PropertyMedia from '#models/property_media'
 import PropertyLegalRequirement from '#models/property_legal_requirement'
 import TenantApplicableFee from '#models/tenant_applicable_fee'
 import PropertyTenant from '#models/property_tenant'
+import SavedProperty from '#models/saved_property'
 
 export type DocumentationStages =
   | 'PROPERTY_INFORMATION'
@@ -373,5 +374,10 @@ export default class PropertyService {
     } catch {
         /** */
     }
+  }
+
+  async isSavedProperty(user:string,property:string):Promise<boolean>{
+    const id = await SavedProperty.query().select(['id']).where('user_id','=',user).andWhere('property_id','=',property)
+    return id[0] ? true : false
   }
 }
