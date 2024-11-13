@@ -3,6 +3,7 @@ import AnalyticsController from "#controllers/analytics_controller";
 import { middleware } from "#start/kernel";
 router.group(()=>{
 
-    router.get('dashboard',[AnalyticsController, 'propertyAnalytics']).use(middleware.auth({guards:['api']}))
-
-}).prefix('/analytic')
+    router.get('dashboard',[AnalyticsController, 'propertyAnalytics'])
+    router.get('profile', [AnalyticsController, 'userProfile'])
+    router.get('top-selling-properties',[AnalyticsController, 'topSelling'])
+}).prefix('/analytic').use(middleware.auth({guards:['api']}))
