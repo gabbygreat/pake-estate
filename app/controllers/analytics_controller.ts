@@ -112,7 +112,7 @@ export default class AnalyticsController {
                 .sum('total_amount','total')
                 props.push({
                     ...property.$attributes,
-                    rentPaid: Number(uniqueInvoices[0].$extras?.total)
+                    rentPaid: Number(uniqueInvoices[0]?.$extras?.total)
                 })
             }
             return sendSuccess(response,{message:"Top Selling Properties", data:props})
