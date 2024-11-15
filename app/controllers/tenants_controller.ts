@@ -7,7 +7,7 @@ import FileUploadService from '#services/fileupload_service'
 import NotificationService from '#services/notification_service'
 import { inject } from '@adonisjs/core'
 import TenantDocument from '#models/tenant_document'
-import { sendError, sendSuccess } from '../utils.js'
+import { getMonthStartAndEnd, sendError, sendSuccess } from '../utils.js'
 import PropertyTenant from '#models/property_tenant'
 import Property from '#models/property'
 import db from '@adonisjs/lucid/services/db'
@@ -509,6 +509,60 @@ export default class TenantsController {
     } catch (error) {
         console.log(error)
         return sendError(response, { message: 'Cannot update payment structure', code: 500 })
+    }
+  }
+
+
+  public async dueRentNotification({ request, auth, response }: HttpContext) {
+    try {
+      interface Filter {
+        property: string
+        search: string
+        page: number
+        perPage: number
+        date: string
+      }
+      const filter: Filter = request.qs() as Filter
+
+      const property_owner = auth.use('api').user?.id
+
+      const query = PropertyTenant.query()
+        .select([
+          'property_tenants.*'
+        ])
+        .preload('propertyInfo',(info)=>{
+          info.select(['property_title'])
+        })
+        .where('property_owner_id', '=', property_owner!)
+        .andWhere('status', '=', "approved")
+        .andWhere('payment_status','=','paid')
+      if(filter.property){
+        query.andWhere('property_id','=',filter.property)
+      }
+      if (
+        filter.search &&
+        filter.search !== null &&
+        filter.search !== ('undefined' as any) &&
+        filter.search !== undefined
+      ) {
+        // query.andWhere((q)=>q.whereRaw('email % ? OR fullname % ?',[...Array(2).fill(filter.search)]))
+        query
+          .join('properties', 'property_tenants.property_id', '=', 'properties.id')
+          .where((q) => q.whereRaw('properties.property_title % ?', [filter.search]))
+          .groupBy(['properties.id', 'property_tenants.id'])
+      }
+      
+      if(filter.date){
+         const { start, end } = getMonthStartAndEnd(filter.date)
+         query.andWhereBetween('property_tenants.payment_next_due_date',[start,end])
+      }
+
+      const tenants = await query
+        .orderBy('property_tenants.payment_next_due_date', 'asc')
+        .paginate(filter.page ?? 1, filter.perPage ?? 20)
+      return sendSuccess(response, { message: 'Tenant list', data: tenants })
+    } catch (error) {
+      return sendError(response, { message: error.message, code: 500 })
     }
   }
 }

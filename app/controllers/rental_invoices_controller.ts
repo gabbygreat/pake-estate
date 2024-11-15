@@ -106,7 +106,7 @@ export default class RentalInvoicesController {
                         invoice.currency_id
                     ]))
                     //Property information
-                    const property = await Property.query().select(['property_title','owner_id']).where('id','=',invoice.property_id)
+                    const property = await Property.query().select(['property_title','owner_id','total_purchases']).where('id','=',invoice.property_id)
                     if(Number(balance[0].balance) >= Number(invoice.total_amount)){
                         
                         await this.walletService.debitWallet({
@@ -121,10 +121,13 @@ export default class RentalInvoicesController {
                         invoice.payment_date = new Date()
                         await invoice.useTransaction(client).save()
 
+                        property[0].total_purchases += 1
+                        await property[0].useTransaction(client).save()
+
                         await PropertyTenant.query({client})
                         .update({
                             payment_status:'fully-paid',
-                            payment_date: new Date()
+                            payment_date: new Date(),
                         })
                         .where('id','=',invoice.tenant_id)
                         //Credit Landlord

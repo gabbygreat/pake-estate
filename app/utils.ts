@@ -109,3 +109,19 @@ export function sendError(
     }
     return otp;
 }
+
+export function getMonthStartAndEnd(dateString:string) {
+  // Parse the input date
+  const date = new Date(dateString);
+
+  // Calculate the start of the month
+  const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+
+  // Calculate the end of the month
+  const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+  return {
+      start: startOfMonth.toISOString().split('T')[0],
+      end: endOfMonth.toISOString().split('T')[0]
+  };
+}

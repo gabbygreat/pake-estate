@@ -18,7 +18,6 @@ emitter.on('checkout_success_stripe', async (data: WebHookObject) => {
         const wallet = await Wallet.find(payment.wallet_id)
         if(wallet){
             wallet.balance = Number(wallet.balance) + Number(payment.amount_paid)
-            console.log("NEW BALANCE IS ",wallet.balance)
             await wallet.save()
             payment.payment_status = 'completed'
             payment.channel_payment_id = payment_id

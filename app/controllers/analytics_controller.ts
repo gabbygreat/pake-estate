@@ -97,8 +97,11 @@ export default class AnalyticsController {
             const user = auth.use('api').user
             const properties = await Property
             .query()
-            .select(['total_reviews','total_rating','total_views','total_purchases','property_title','id'])
-            .where('owner_id','=',user?.id!)
+            .select(['total_reviews','total_rating','total_views','total_purchases','property_title','id','currency_id'])
+            .where('owner_id','=',user?.id!) //WILL ADD CONTIDION OF total_purchases greater than 1
+            .preload('currency',(currency)=>{
+                currency.select(['name','symbol','id','code','decimal_digits','symbol_native'])
+            })
             .orderByRaw(`total_purchases DESC,total_rating`)
             .limit(10)
             const props:Array<unknown>= []
@@ -111,7 +114,8 @@ export default class AnalyticsController {
                 .groupBy('tenant_id')
                 .sum('total_amount','total')
                 props.push({
-                    ...property.$attributes,
+                    ...property?.$attributes,
+                    currency:property?.currency,
                     rentPaid: Number(uniqueInvoices[0]?.$extras?.total)
                 })
             }
