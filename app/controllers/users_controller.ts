@@ -13,6 +13,8 @@ import EmailService ,{VerificationEmail,ForgotPasswordEmail} from '#services/ema
 import env from '#start/env'
 import Notification from '#models/notification'
 import { lowerCase } from '../utils.js'
+import hash from '@adonisjs/core/services/hash'
+import FileUploadService from '#services/fileupload_service'
 
 @inject()
 export default class UsersController {
@@ -21,7 +23,8 @@ export default class UsersController {
          protected otpService:OTPService,
          protected loginService:LoginService,
          protected emailService:EmailService,
-         protected noticeService:NotificationService
+         protected noticeService:NotificationService,
+         protected fileUpload:FileUploadService
     ){}
 
     async register({request,response}:HttpContext){
@@ -302,4 +305,75 @@ export default class UsersController {
         }
     }
 
+   async updateProfile({ request, auth, response }: HttpContext) {
+     try{
+        const user = auth.use('api').user
+        if (!user) {
+         return response.unauthorized({ message: "User not authorized" })
+     }
+        // Directly merge request data without validation
+        user.merge(request.only([
+        'firstname',
+        'lastname',
+        'email',
+        'phone_number',
+        'house_number',
+        'street_name',
+        'city',
+        'postal_code',
+        'country'
+        ]))
+       // Upload profile picture if provided
+       const profilePic = request.file('profile_picture');
+       if (profilePic) {
+         // Use the upload service to store the profile picture and get the URL
+         const profilePictureUrl = await this.fileUpload.uploadStaticMediaFiles(
+           request,
+           'profile_picture',   // Field name in the form
+           'profile_pictures'    // Destination folder in the storage
+         );
+   
+         // Update user profile picture URL in the database
+         user.profile_picture = profilePictureUrl;
+       }
+      
+     await user.save()
+
+        return response.ok({ message: "User profile updated successfully", user })
+        }catch (error) {
+            return sendError(response,{message: error.message})
+        }
+     }
+
+
+     async changePassword({ request, auth, response }: HttpContext) {
+        try{
+        // Get the authenticated user
+        const user = auth.use('api').user
+        if (!user) {
+            return sendError(response,{message:'User not Authorized'})
+        }
+    
+        const { oldPassword, newPassword, confirmPassword } =  request.body()
+        //check if new password matches the confirm password
+        if(newPassword !== confirmPassword){
+            return sendError(response,{message:'Both Password does not match'})
+        }
+    
+        // Verify the old password
+        const oldHash = await hash.verify(user.password,oldPassword)
+        if (!oldHash) {
+            return sendError(response,{message:'Old Password is Incorrect'})
+        }
+        if(user.password === oldPassword){
+            return sendError(response,{message:'New Password cannot be the same with Old Password'})
+        }
+        //check if password matches the new password, then save
+        user.password = newPassword
+        await user.save()
+        return sendSuccess(response,{message:'Password successfully changed'})
+      }catch (error) {
+        return sendError(response,{message: error.message})
+    }
+}
 }
