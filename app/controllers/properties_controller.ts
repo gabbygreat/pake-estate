@@ -675,6 +675,29 @@ export default class PropertiesController {
         return sendError(response,{message:error.message,code:500})
     }
 }
+
+    public async updateSetting({request,auth,response}:HttpContext){
+        try {
+            const user = auth.use('api').user!
+            const { id, grace_period } = request.body()
+            const property = await Property.find(id)
+            if(property){
+                if(property.owner_id == user.id){
+                    if(grace_period){
+                        property.payment_grace_period = Number(grace_period)
+                    }
+                    await property.save()
+                    return sendSuccess(response,{message:"Property information updated"})
+                }else{
+                    return sendError(response,{message:"You cannot update this property", code: 403})
+                }
+            }else{
+                return sendError(response,{message:"Property not found", code: 404})
+            }
+        } catch (error) {
+            return sendError(response,{message:error.message,code:500})
+        }
+    }
 }
 
 

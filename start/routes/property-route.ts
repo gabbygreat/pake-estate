@@ -21,5 +21,5 @@ router.group(()=>{
     router.post('save-property',[PropertyController,'saveProperty']).use(middleware.auth({guards:['api']}))
     router.get('location-search-hint/:location',[PropertyController,'searchLocationHint'])
     router.get('my-rented-properties',[PropertyController, 'rentedProperties']).use(middleware.auth({guards:['api']}))
-    
+    router.patch('settings',[PropertyController, 'updateSetting']).use(middleware.auth({guards:['api']}))
 }).prefix('/property')

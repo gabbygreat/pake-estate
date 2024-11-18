@@ -137,6 +137,9 @@ export default class Property extends BaseModel {
   declare manager_contact_details: string
 
   @column()
+  declare payment_grace_period: number
+
+  @column()
   declare currency_id: string | null
 
   @column.dateTime({ autoCreate: true })
