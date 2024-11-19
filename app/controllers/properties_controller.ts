@@ -686,12 +686,21 @@ export default class PropertiesController {
     public async updateSetting({request,auth,response}:HttpContext){
         try {
             const user = auth.use('api').user!
-            const { id, grace_period } = request.body()
+            const { id, grace_period, autorenewal, tenant_id } = request.body()
             const property = await Property.find(id)
             if(property){
                 if(property.owner_id == user.id){
                     if(grace_period){
                         property.payment_grace_period = Number(grace_period)
+                    }
+                    if(autorenewal && tenant_id){
+                        const tenant = await PropertyTenant.query().select('*').where((q)=>{
+                            q.whereRaw(`property_id = ? AND id = ?`,[id,tenant_id])
+                        })
+                        if(tenant[0]){
+                            tenant[0].auto_renewal = autorenewal == 'true' || autorenewal == true ? true : false
+                            tenant[0].save()
+                        }
                     }
                     await property.save()
                     return sendSuccess(response,{message:"Property information updated"})

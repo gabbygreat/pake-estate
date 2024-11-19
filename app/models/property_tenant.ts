@@ -108,6 +108,9 @@ export default class PropertyTenant extends BaseModel {
   @column()
   declare payment_status: 'partially-paid'|'unpaid'|'fully-paid'
 
+  @column()
+  declare auto_renewal: boolean
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
