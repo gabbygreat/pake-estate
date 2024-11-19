@@ -137,4 +137,23 @@ export default class AnalyticsController {
             WHERE owner_id = '${owner_id}'`)
         return query.rows[0]
     }
+
+    public async applicantAnalytic({ auth, response }:HttpContext){
+        try {
+            const user = auth.use('api').user!
+
+            const query = await db.rawQuery(`
+                SELECT 
+                COUNT(CASE WHEN status = 'in-progress' THEN 1 END)::INTEGER as in_progress,
+                COUNT(CASE WHEN status = 'rejected' THEN 1 END)::INTEGER as rejected,
+                COUNT(CASE WHEN status = 'approved' THEN 1 END)::INTEGER as approved,
+                COUNT(CASE WHEN status = 'cancelled' THEN 1 END)::INTEGER as cancelled
+                FROM property_tenants
+                WHERE property_owner_id = '${user.id}'`)
+
+            return sendSuccess(response,{data:query.rows[0],message:'Application analytics'})
+        } catch (error) {
+            return sendError(response,{message:error.message, code:500})
+        }
+    }
 }
