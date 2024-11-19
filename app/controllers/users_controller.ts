@@ -124,7 +124,7 @@ export default class UsersController {
                 if(!user.email_verified){
                     const prevOTP = await this.otpService.getRedisCode({user_id:user.id,code_type:'email_verification'})
                     if(prevOTP){
-                        return sendSuccess(response,{message:'Please use the link already sent to your email'})
+                        return sendError(response,{message:'Please use the link already sent to your email', code:403})
                     }else{
                         const verificationOTP = await this.otpService.genRedisCode({user_id:user.id,code_type:'email_verification',for_mobile_client: mobileFlag ? true : false})
                         await this.emailService.setTemplate<VerificationEmail>(mobileFlag ? 'otp_email_verification': 'email_verification',
