@@ -299,7 +299,7 @@ export default class PropertiesController {
             const user = auth.use('api').user
             const { review, rating, property_id} = request.body()
             await request.validateUsing(createReviewValidator)
-            const isDraft = await Property.query().select(['current_state']).where('id','=',property_id)
+            const isDraft = await Property.query().select(['current_state','owner_id','property_title']).where('id','=',property_id)
             if(isDraft[0] && isDraft[0].current_state === 'draft'){
                 return sendError(response,{message:"Property has not been published", code:400})
             }
@@ -309,8 +309,15 @@ export default class PropertiesController {
                 review,
                 user_id:user?.id
             }
-            await PropertyReview.updateOrCreate({user_id:user?.id,property:property_id},data)
-            await this.propertyService.updateRatingandReview(property_id)
+            const reviewX = await PropertyReview.updateOrCreate({user_id:user?.id,property:property_id},data)
+            await this.propertyService.updateRatingandReview({
+                propertyID:property_id,
+                ownerId: isDraft[0].owner_id,
+                propertyName: isDraft[0].property_title, 
+                reviewId:reviewX.id,
+                reviewerId: user?.id!
+            })
+            
             return sendSuccess(response,{message:"Review submitted"})
         } catch (error) {
             return sendError(response,{error:error,message:error.message})

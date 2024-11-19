@@ -12,6 +12,8 @@ import PropertyLegalRequirement from '#models/property_legal_requirement'
 import TenantApplicableFee from '#models/tenant_applicable_fee'
 import PropertyTenant from '#models/property_tenant'
 import SavedProperty from '#models/saved_property'
+import NotificationService from './notification_service.js'
+import Notification from '#models/notification'
 
 export type DocumentationStages =
   | 'PROPERTY_INFORMATION'
@@ -321,7 +323,9 @@ export default class PropertyService {
 
   async updatePurchaseCount() {}
 
-  async updateRatingandReview(propertyID: string) {
+  async updateRatingandReview(
+    {propertyID,propertyName,ownerId,reviewId,reviewerId}:
+    {propertyID: string,propertyName:string,ownerId:string,reviewId:string,reviewerId:string}) {
     const data = await db.rawQuery(
       `SELECT COUNT(id) as total_review,SUM(rating) as total_rating FROM property_reviews WHERE property = '${propertyID}'`
     )
@@ -332,6 +336,23 @@ export default class PropertyService {
       await Property.query().where('id', '=', propertyID).update({
         total_reviews: totalReview,
         total_rating: averageRating,
+      })
+    }
+
+    if(totalReview === 1){
+      const notificationService = new NotificationService()
+      const notificationTemplate = notificationService.message()['NEW_REVIEW_NOTIFICATION']({property_name: propertyName})
+      await Notification.create({
+        user_id: ownerId,
+        title: notificationTemplate.title,
+        message: notificationTemplate.message,
+        type: notificationTemplate.type,
+        actor_refs: JSON.stringify([reviewerId]),
+        entity_ids: JSON.stringify({
+          property_id: propertyID,
+          review_id: reviewId,
+        }),
+        slug: 'NEW_REVIEW_NOTIFICATION',
       })
     }
   }
