@@ -172,7 +172,7 @@ export default class TenantsController {
           })
         await Notification.create(
           {
-            user_id: owner[0].owner_id,
+            user_id: auth.use('api').user?.id,
             title: notificationTemplate.title,
             message: notificationTemplate.message,
             type: notificationTemplate.type,
