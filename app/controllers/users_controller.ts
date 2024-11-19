@@ -136,7 +136,7 @@ export default class UsersController {
                                 to: email,
                                 from: 'Pake Estate Management'
                             })
-                        return sendSuccess(response,{message:'An email verification link has been sent to your email'})
+                        return sendError(response,{message:'An email verification link has been sent to your email', code:403})
                     } 
                 }
                 const token = await User.accessTokens.create(user)
@@ -220,7 +220,7 @@ export default class UsersController {
                             to: email,
                             from: 'Pake Estate Management'
                         })
-                    return sendSuccess(response,{message:'Please verify your email address before this action.'})
+                    return sendError(response,{message:'Please verify your email address before this action.', code:403})
                 }else{
                     const prevOTP = await this.otpService.getRedisCode({user_id:user.id,code_type:'password_reset'})
                     if(prevOTP){
