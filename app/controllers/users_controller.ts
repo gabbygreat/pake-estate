@@ -327,14 +327,14 @@ export default class UsersController {
        const profilePic = request.file('profile_picture');
        if (profilePic) {
          // Use the upload service to store the profile picture and get the URL
-         const profilePictureUrl = await this.fileUpload.uploadStaticMediaFiles(
+         const profilePictureUrl = await this.fileUpload.uploadFiles(
            request,
            'profile_picture',   // Field name in the form
            'profile_pictures'    // Destination folder in the storage
          );
    
          // Update user profile picture URL in the database
-         user.profile_picture = profilePictureUrl;
+         user.profile_picture = profilePictureUrl[0].name;
        }
       
      await user.save()
