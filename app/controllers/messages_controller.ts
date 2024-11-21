@@ -57,7 +57,7 @@ export default class MessagesController {
             const { id } = request.params()
             const user = await User.query().select(['firstname','lastname','profile_picture']).where('id','=',id)
             if(user){
-                return sendSuccess(response,{data:{firstname: user[0].firstname, lastname:user[0].lastname}})
+                return sendSuccess(response,{data:{firstname: user[0].firstname, lastname:user[0].lastname, profile_picture:user[0].profile_picture}})
             }else{
                 return sendSuccess(response,{data:{firstname:'', lastname:''}})
             }
