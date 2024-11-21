@@ -692,6 +692,7 @@ export default class PropertiesController {
                 if(property.owner_id == user.id){
                     if(grace_period){
                         property.payment_grace_period = Number(grace_period)
+                        await property.save()
                     }
                     if(autorenewal && tenant_id){
                         const tenant = await PropertyTenant.query().select('*').where((q)=>{
@@ -699,10 +700,9 @@ export default class PropertiesController {
                         })
                         if(tenant[0]){
                             tenant[0].auto_renewal = autorenewal == 'true' || autorenewal == true ? true : false
-                            tenant[0].save()
+                            await tenant[0].save()
                         }
                     }
-                    await property.save()
                     return sendSuccess(response,{message:"Property information updated"})
                 }else{
                     return sendError(response,{message:"You cannot update this property", code: 403})

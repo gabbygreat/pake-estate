@@ -5,6 +5,8 @@ import Property from '#models/property'
 import PropertyTenant from '#models/property_tenant'
 import RentalInvoice from '#models/rental_invoice'
 import db from '@adonisjs/lucid/services/db'
+// import WalletPayment from '#models/wallet_payment'
+// import MaintenanceRequest from '#models/maintenance_request'
 
 export default class AnalyticsController {
 
@@ -156,4 +158,88 @@ export default class AnalyticsController {
             return sendError(response,{message:error.message, code:500})
         }
     }
+
+    // public async incomeSummary({ request,auth,response}:HttpContext){
+    //     try {
+    //         const user = auth.use('api').user!
+    //         type Filter = '7 days'|'3 days'|'1 month'|'3 months'|'6 months'|'1 year'
+    //         const date:Filter = request.params()
+    //         const now = new Date()
+    //         //this will also be the end date for prev calcultion
+    //         const startDate = date == '1 month' ? now.getTime() - (3600 * 24 * 30 * 1000) :
+    //                         date == '1 year' ? now.getTime() - (3600 * 24 * 365 * 1000) :
+    //                         date == '3 days' ? now.getTime() - (3600 * 24 * 3 * 1000) :
+    //                         date == '3 months' ? now.getTime() - (3600 * 24 * 90 * 1000) :
+    //                         date == '6 months' ? now.getTime() - (3600 * 24 * 180 * 1000) :
+    //                         date == '7 days' ? now.getTime() - (3600 * 24 * 7 * 1000) : 0
+    //         //Total Income
+    //         const totalIncome = await RentalInvoice
+    //         .query()
+    //         .join('properties','rental_invoices.property_id', '=', 'properties.id')
+    //         .where((q)=>{
+    //             q.whereRaw('rental_invoices.status = ? AND properties.owner_id = ? AND created_at BETWEEN ? AND ?',
+    //                 ['paid',user.id,new Date(startDate),now])
+    //         })
+    //         .sum('rental_invoices.total_amount','income')
+    //         const totalIncomePrev = await RentalInvoice
+    //         .query()
+    //         .join('properties','rental_invoices.property_id', '=', 'properties.id')
+    //         .where((q)=>{
+    //             q.whereRaw('rental_invoices.status = ? AND properties.owner_id = ? AND created_at <= ?',
+    //                 ['paid',user.id,new Date(startDate)])
+    //         })
+    //         .sum('rental_invoices.total_amount','income')
+
+
+    //         const totalExpense = await WalletPayment
+    //         .query()
+    //         .join('wallets','wallet_payments.wallet_id', '=', 'wallets.id')
+    //         .where((q)=>{
+    //             q.whereRaw('wallet_payments.payment_status = ? AND wallets.user_id = ? AND transaction_type IN ? AND created_at BETWEEN ? AND ?',
+    //                 ['completed',user.id,['WITHDRAWAL','DEBIT'],new Date(startDate),now])
+    //         })
+    //         .sum('wallet_payments.amount_paid','expense')
+    //         const totalExpensePrev = await WalletPayment
+    //         .query()
+    //         .join('wallets','wallet_payments.wallet_id', '=', 'wallets.id')
+    //         .where((q)=>{
+    //             q.whereRaw('wallet_payments.payment_status = ? AND wallets.user_id = ? AND transaction_type IN ? AND created_at BETWEEN ? AND ?',
+    //                 ['completed',user.id,['WITHDRAWAL','DEBIT'],new Date(startDate),now])
+    //         })
+    //         .sum('wallet_payments.amount_paid','expense')
+
+
+    //         const rentReceived = await PropertyTenant
+    //         .query()
+    //         .join('properties','property_tenants.property_id', '=', 'properties.id')
+    //         .where((q)=>{
+    //             q.whereRaw('properties.listing_type = ? AND properties.owner_id = ? AND created_at BETWEEN ? AND ?',
+    //                 ['rent',user.id,new Date(startDate),now])
+    //         })
+    //         .count('property_tenants.id','tenants')
+
+    //         const rentReceivedPrev = await PropertyTenant
+    //         .query()
+    //         .join('properties','property_tenants.property_id', '=', 'properties.id')
+    //         .where((q)=>{
+    //             q.whereRaw('properties.listing_type = ? AND properties.owner_id = ? AND created_at BETWEEN ? AND ?',
+    //                 ['rent',user.id,new Date(startDate),now])
+    //         })
+    //         .count('property_tenants.id','tenants')
+
+
+    //         const maintenance = await MaintenanceRequest.query()
+    //         .where((q)=>{
+    //             q.whereRaw(`owner_id = ? AND created_at BETWEEN ? AND ?`,[user.id,new Date(startDate),now])
+    //         }).count('id','total')
+
+    //         const maintenancePrev = await MaintenanceRequest.query()
+    //         .where((q)=>{
+    //             q.whereRaw(`owner_id = ? AND created_at <= ?`,[user.id,new Date(startDate)])
+    //         }).count('id','total')
+
+    //     } catch (error) {
+    //         return sendError(response,{message:error.message, code:500})
+    //     }
+    // }
 }
