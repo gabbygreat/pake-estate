@@ -688,28 +688,28 @@ export default class PropertiesController {
             const user = auth.use('api').user!
             const { property_id, grace_period, autorenewal, tenant_id } = request.body()
             const property = await Property.find(property_id)
+
             if(property){
                 if(property.owner_id == user.id){
                     if(grace_period){
                         property.payment_grace_period = Number(grace_period)
                         await property.save()
                     }
-                    if(autorenewal && tenant_id){
-                        const tenant = await PropertyTenant.query().select('*').where((q)=>{
-                            q.whereRaw(`property_id = ? AND id = ?`,[property_id,tenant_id])
-                        })
-                        if(tenant[0]){
-                            tenant[0].auto_renewal = autorenewal == 'true' || autorenewal == true ? true : false
-                            await tenant[0].save()
-                        }
-                    }
                     return sendSuccess(response,{message:"Property information updated"})
-                }else{
-                    return sendError(response,{message:"You cannot update this property", code: 403})
                 }
-            }else{
-                return sendError(response,{message:"Property not found", code: 404})
             }
+
+            if(autorenewal || tenant_id){
+                const tenant = await PropertyTenant.query().select('*').where((q)=>{
+                    q.whereRaw(`property_id = ? AND id = ?`,[property_id,tenant_id])
+                })
+                if(tenant[0]){
+                    tenant[0].auto_renewal = autorenewal == 'true' || autorenewal == true ? true : false
+                    await tenant[0].save()
+                    return sendSuccess(response,{message:"Renewal information updated"})
+                }
+            }
+            return sendSuccess(response,{message:"Property information updated"})
         } catch (error) {
             return sendError(response,{message:error.message,code:500})
         }
