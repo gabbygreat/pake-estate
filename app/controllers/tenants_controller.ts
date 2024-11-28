@@ -182,6 +182,24 @@ export default class TenantsController {
           },
           { client }
         )
+
+        const notificationTemplate2 = this.notificationService
+          .message()
+          ['RENTAL_APPLICATION_SUBMISSION_LANDLORD']({
+            property_name: owner[0].property_title,
+          })
+        await Notification.create(
+          {
+            user_id:owner[0].id,
+            title: notificationTemplate2.title,
+            message: notificationTemplate2.message,
+            type: notificationTemplate2.type,
+            actor_refs: JSON.stringify([data.applicant_id]),
+            entity_ids: JSON.stringify({ property_id: property_id }),
+            slug: 'RENTAL_APPLICATION_SUBMISSION_LANDLORD',
+          },
+          { client }
+        )
         return sendSuccess(response, { message: 'Application Submitted', code: 200 })
       })
     } catch (error) {
@@ -296,6 +314,25 @@ export default class TenantsController {
         }
         if (status === 'rejected') {
           record.rejection_reason = reason
+
+          const notificationTemplate = this.notificationService
+            .message()
+            ['RENTAL_APPLICATION_REJECTION']({
+              property_name: property[0].property_title,
+            })
+          await Notification.create({
+            user_id: record.applicant_id,
+            title: notificationTemplate.title,
+            message: notificationTemplate.message,
+            type: notificationTemplate.type,
+            actor_refs: JSON.stringify([currentUser]),
+            entity_ids: JSON.stringify({
+              property_id: record.property_id,
+              tenancy_application_id: record.id,
+            }),
+            slug: 'RENTAL_APPLICATION_REJECTION',
+          })
+
         }
         await record.save()
         return sendSuccess(response, {

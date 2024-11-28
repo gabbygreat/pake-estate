@@ -5,12 +5,17 @@ import Property from '#models/property'
 import MaintenanceRequest from '#models/maintenance_request'
 import FileUploadService from '#services/fileupload_service'
 import { inject } from '@adonisjs/core'
+import NotificationService from '#services/notification_service'
 import PropertyTenant from '#models/property_tenant'
+import Notification from '#models/notification'
 
 @inject()
 export default class MaintenanceController {
 
-    constructor(protected uploadService:FileUploadService){}
+    constructor(
+        protected uploadService:FileUploadService,
+        protected notificationService:NotificationService
+    ){}
 
     public async composeRequest({request,response,auth}:HttpContext){
         try {
@@ -49,6 +54,24 @@ export default class MaintenanceController {
                     ]) as any
                 }
                 await maintenanceRequest.save()
+                if(!id){
+                    const notificationTemplate = this.notificationService
+                    .message()['MAINTENANCE_REQUEST']({
+                        property_name: owner_id[0].property_title,
+                        user:`${applicant_id.firstname} ${applicant_id.lastname}`
+                    })
+                    await Notification.create(
+                    {
+                        user_id:owner_id[0].id,
+                        title: notificationTemplate.title,
+                        message: notificationTemplate.message,
+                        type: notificationTemplate.type,
+                        actor_refs: JSON.stringify([applicant_id.id]),
+                        entity_ids: JSON.stringify({ property_id: property_id }),
+                        slug: 'MAINTENANCE_REQUEST',
+                    },
+                    )
+                }
                 return sendSuccess(response,{message:'Maintenance request received'})
             }else{
                 return sendError(response,{message:'Invalid owner or applicant id', code:403})

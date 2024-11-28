@@ -11,6 +11,13 @@ export default class NotificationService {
                     type: 'info' 
                 }
             },
+            "RENTAL_APPLICATION_SUBMISSION_LANDLORD": ({property_name}:{property_name:string}) => {
+                return { 
+                    title: `Rental Application Received`, 
+                    message: `You have a received a new rental application for property ${property_name}.`,
+                    type: 'info' 
+                }
+            },
             "RENTAL_APPLICATION_ACCEPTANCE": ({property_name}:{property_name:string}) => {
                 return { 
                     title: `Rental Application Accepted`, 
@@ -22,7 +29,7 @@ export default class NotificationService {
                 return { 
                     title: `Rental Application Rejected`, 
                     message: `We regret to inform you that your rental application for ${property_name} has been rejected. You can contact landlord for more details .`,
-                    type: 'error' 
+                    type: 'info' 
                 }
             },
             "RENTAL_CANCELLATION": ({property_name}:{property_name:string}) => {
@@ -57,6 +64,13 @@ export default class NotificationService {
                 return {
                     title: `New Review Received`,
                     message: `You have received a new review for ${property_name}. Check the details in your account.`,
+                    type: 'info'  
+                }
+            },
+            "MAINTENANCE_REQUEST": ({property_name, user}:{property_name:string,user:string}) => {
+                return {
+                    title: `New Maintenance Request`,
+                    message: `You have received a new maintenance request for  ${property_name} from ${user}.`,
                     type: 'info'  
                 }
             }

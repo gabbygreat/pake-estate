@@ -187,8 +187,8 @@ export default class RentalInvoicesController {
                     return sendError(response,{message:"Invoice not found",code:400})
                 }
             })
-        } catch {
-            return sendError(response,{message:"Rental Invoices", code: 500}) 
+        } catch(e) {
+            return sendError(response,{message:e.message, code: 500}) 
         }
     }
 
