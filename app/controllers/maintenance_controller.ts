@@ -5,6 +5,7 @@ import Property from '#models/property'
 import MaintenanceRequest from '#models/maintenance_request'
 import FileUploadService from '#services/fileupload_service'
 import { inject } from '@adonisjs/core'
+import PropertyTenant from '#models/property_tenant'
 
 @inject()
 export default class MaintenanceController {
@@ -16,7 +17,12 @@ export default class MaintenanceController {
             const { id, request_title,description, property_id } = request.body()
             const applicant_id = auth.use('api').user
             const owner_id = await Property.query().select(['owner_id']).where('id','=',property_id)
-            
+            //check if this applicant is a member of the property
+            const check = await PropertyTenant.query().select(['id']).whereRaw(`
+                property_id = ? AND applicant_id = ? AND payment_status = ?`,[property_id,applicant_id?.id,'paid'])
+            if(!check[0].id){
+                return sendError(response,{message:"You are not yet a tenant!", code:403})
+            }
             let maintenanceRequest: MaintenanceRequest
 
             if(applicant_id && owner_id[0]){
