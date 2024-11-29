@@ -106,7 +106,9 @@ export default class RentalInvoicesController {
                         invoice.currency_id
                     ]))
                     //Property information
-                    const property = await Property.query().select(['property_title','owner_id','total_purchases']).where('id','=',invoice.property_id)
+                    const property = await Property.query({client})
+                    .select(['property_title','owner_id','total_purchases'])
+                    .where('id','=',invoice.property_id)
                     if(Number(balance[0].balance) >= Number(invoice.total_amount)){
                         
                         await this.walletService.debitWallet({
@@ -188,6 +190,7 @@ export default class RentalInvoicesController {
                 }
             })
         } catch(e) {
+            console.log(e)
             return sendError(response,{message:e.message, code: 500}) 
         }
     }
