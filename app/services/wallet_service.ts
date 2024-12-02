@@ -112,7 +112,6 @@ export default class WalletService{
 
           const wallet = await Wallet.query({client}).select('*')
           .where((q)=>q.whereRaw(`user_id = ? AND currency_id = ?`,[user_id,currency]))
-          console.log(wallet)
           wallet[0].balance = Number(wallet[0].balance) - Number(amount)
           await wallet[0].useTransaction(client).save()
 

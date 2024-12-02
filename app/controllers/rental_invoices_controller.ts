@@ -95,10 +95,8 @@ export default class RentalInvoicesController {
             const { id } = request.params()
             await db.transaction(async(client)=>{
                 const user = auth.use('api').user!
-                console.log("user is ",user.id)
                 const invoice = await RentalInvoice.find(id,{client})
                 if(invoice && user){
-                    console.log('currency id ',invoice.currency_id)
                     if(invoice.status == 'paid'){
                         return sendError(response,{message:"Invoice already paid for", code:403})
                     }
@@ -108,9 +106,8 @@ export default class RentalInvoicesController {
                         invoice.currency_id
                     ]))
                     //Property information
-                    console.log('property id ',invoice.property_id)
                     const property = await Property.query({client})
-                    .select(['property_title','owner_id','total_purchases'])
+                    .select(['property_title','owner_id','total_purchases','id'])
                     .where('id','=',invoice.property_id)
                     if(Number(balance[0].balance) >= Number(invoice.total_amount)){
                         
@@ -128,7 +125,6 @@ export default class RentalInvoicesController {
 
                         property[0].total_purchases += 1
                         await property[0].useTransaction(client).save()
-
                         await PropertyTenant.query({client})
                         .update({
                             payment_status:'fully-paid',
