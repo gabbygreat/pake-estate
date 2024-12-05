@@ -309,6 +309,9 @@ export default class TenantsController {
             slug: 'RENTAL_APPLICATION_ACCEPTANCE',
           })
           record.approval_date = new Date()
+          const gracePeriod = property[0].payment_grace_period || 3600 * 24 * 3
+          const date = new Date(Date.now() + gracePeriod * 1000)
+          record.rent_payment_grace_period = date
           //Generate RENTAL INVOICE FOR THE USER
           await this.rentalInvoiceService.generateInvoice(tenant_id)
         }

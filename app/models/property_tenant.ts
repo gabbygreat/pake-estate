@@ -111,6 +111,9 @@ export default class PropertyTenant extends BaseModel {
   @column()
   declare auto_renewal: boolean
 
+  @column()
+  declare rent_payment_grace_period:Date
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

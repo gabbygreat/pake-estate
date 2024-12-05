@@ -75,6 +75,7 @@ export default class PropertyService {
       property.bathrooms = bathrooms
       property.furnishing = furnishing
       property.listing_type = listing_type
+      property.payment_grace_period = 3600 * 24 * 3 //3 DAYS GRACE PERIOD
       await property.save()
       return sendSuccess(response, { message: 'Property information updated', data: property })
     } catch (error) {
