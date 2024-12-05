@@ -469,7 +469,7 @@ export default class TenantsController {
       const properties = await PropertyTenant.query()
         .select(['id', 'property_id', 'applicant_id'])
         .where((q) => {
-          q.whereRaw('applicant_id = ? AND status = ? AND payment_status = ?', [tenant?.id, 'approved','paid'])
+          q.whereRaw('applicant_id = ? AND status = ? AND payment_status = ?', [tenant?.id, 'approved','fully-paid'])
         })
         .preload('propertyInfo', (property) => {
           property.select(['property_title','currency_id'])
