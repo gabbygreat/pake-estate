@@ -9,6 +9,9 @@ import NotificationService from '#services/notification_service'
 import PropertyTenant from '#models/property_tenant'
 import Notification from '#models/notification'
 
+interface MaintenanceNotice {
+    property_name:string,receiver:string,property_id:string,owner:string
+}
 @inject()
 export default class MaintenanceController {
 
@@ -90,12 +93,41 @@ export default class MaintenanceController {
             }
             const req = await MaintenanceRequest.find(request_id)
             if(req && property_owner){
+                const property = await Property.query().select(['id','property_title']).where('id','=',req.property_id)
                 if(property_owner.id !== req.owner_id){
                     return sendError(response,{message:"You are not authorized to perform this operation", code:403})
                 }
                 req.status = status
                 await req.save()
                 //TODO:: SEND NOTIFICATIONS
+                switch(status){
+                    case 'rejected':
+                        await this.maintenanceRejected({
+                            property_id:property[0]?.id,
+                            property_name:property[0]?.property_title,
+                            owner: property_owner.id,
+                            receiver:req.applicant_id
+                        })
+                        break;
+                    case 'ongoing':
+                        await this.maintenanceApproved({
+                            property_id:property[0]?.id,
+                            property_name:property[0]?.property_title,
+                            owner: property_owner.id,
+                            receiver:req.applicant_id
+                        })
+                        break;
+                    case 'done':
+                        await this.maintenanceDone({
+                            property_id:property[0]?.id,
+                            property_name:property[0]?.property_title,
+                            owner: property_owner.id,
+                            receiver:req.applicant_id
+                        })
+                        break;
+                    default:
+                        break;
+                }
                 return sendSuccess(response,{message:"Maintenance requst status updated"})
             }else{
                 return sendError(response,{message:"Maintenance request not found", code:404})
@@ -103,6 +135,60 @@ export default class MaintenanceController {
         } catch (error) {
             return sendError(response,{message:error.message,error})
         }
+    }
+
+    async maintenanceDone({property_name,receiver,property_id,owner}:MaintenanceNotice){
+        const notificationTemplate = this.notificationService
+        .message()['MAINTENANCE_REQUEST_COMPLETED']({
+            property_name
+        })
+        await Notification.create(
+        {
+            user_id:receiver,
+            title: notificationTemplate.title,
+            message: notificationTemplate.message,
+            type: notificationTemplate.type,
+            actor_refs: JSON.stringify([owner]),
+            entity_ids: JSON.stringify({ property_id: property_id }),
+            slug: 'MAINTENANCE_REQUEST_COMPLETED',
+        },
+        )
+    }
+
+    async maintenanceApproved({property_name,receiver,property_id,owner}:MaintenanceNotice){
+        const notificationTemplate = this.notificationService
+        .message()['MAINTENANCE_REQUEST_ACCEPTED']({
+            property_name
+        })
+        await Notification.create(
+        {
+            user_id:receiver,
+            title: notificationTemplate.title,
+            message: notificationTemplate.message,
+            type: notificationTemplate.type,
+            actor_refs: JSON.stringify([owner]),
+            entity_ids: JSON.stringify({ property_id: property_id }),
+            slug: 'MAINTENANCE_REQUEST_ACCEPTED',
+        },
+        )
+    }
+
+    async maintenanceRejected({property_name,receiver,property_id,owner}:MaintenanceNotice){
+        const notificationTemplate = this.notificationService
+        .message()['MAINTENANCE_REQUEST_REJECTION']({
+            property_name
+        })
+        await Notification.create(
+        {
+            user_id:receiver,
+            title: notificationTemplate.title,
+            message: notificationTemplate.message,
+            type: notificationTemplate.type,
+            actor_refs: JSON.stringify([owner]),
+            entity_ids: JSON.stringify({ property_id: property_id }),
+            slug: 'MAINTENANCE_REQUEST_REJECTION',
+        },
+        )
     }
 
     public async deleteRequest({request,response,auth}:HttpContext){

@@ -73,6 +73,27 @@ export default class NotificationService {
                     message: `You have received a new maintenance request for  ${property_name} from ${user}.`,
                     type: 'info'  
                 }
+            },
+            "MAINTENANCE_REQUEST_REJECTION": ({property_name}:{property_name:string}) => {
+                return {
+                    title: `Maintenance Request Rejected`,
+                    message: `Your maintenance request for property ${property_name} was rejected by the property owner.`,
+                    type: 'info'  
+                }
+            },
+            "MAINTENANCE_REQUEST_COMPLETED": ({property_name}:{property_name:string}) => {
+                return {
+                    title: `Maintenance Request Done`,
+                    message: `Your maintenance request for property ${property_name} has been completed successfully.`,
+                    type: 'info'  
+                }
+            },
+            "MAINTENANCE_REQUEST_ACCEPTED": ({property_name}:{property_name:string}) => {
+                return {
+                    title: `Maintenance Request Accepted`,
+                    message: `Your maintenance request for property ${property_name} was accepted.`,
+                    type: 'info'  
+                }
             }
         }
     }
