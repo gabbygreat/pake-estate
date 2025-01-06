@@ -24,7 +24,7 @@ export default class MaintenanceController {
         try {
             const { id, request_title,description, property_id } = request.body()
             const applicant_id = auth.use('api').user
-            const owner_id = await Property.query().select(['owner_id']).where('id','=',property_id)
+            const owner_id = await Property.query().select(['owner_id','property_title']).where('id','=',property_id)
             //check if this applicant is a member of the property
             const check = await PropertyTenant.query().select(['id']).whereRaw(`
                 property_id = ? AND applicant_id = ? AND payment_status = ?`,[property_id,applicant_id?.id,'paid'])
@@ -65,7 +65,7 @@ export default class MaintenanceController {
                     })
                     await Notification.create(
                     {
-                        user_id:owner_id[0].id,
+                        user_id:owner_id[0].owner_id,
                         title: notificationTemplate.title,
                         message: notificationTemplate.message,
                         type: notificationTemplate.type,
