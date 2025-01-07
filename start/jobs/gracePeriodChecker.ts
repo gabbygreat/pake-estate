@@ -14,6 +14,9 @@ const job1 = new CronJob(
           .select('*')
           .where('status', '=', 'approved')
           .andWhere('payment_status', '=', 'unpaid')
+          .andWhere((q)=>{
+            q.whereRaw('rent_payment_grace_period IS NOT NULL')
+          })
           .andWhere('rent_payment_grace_period','<',now)
         for(const tenant of tenants){
             tenant.rent_payment_grace_period = null as any
