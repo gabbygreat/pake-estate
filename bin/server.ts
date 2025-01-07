@@ -45,6 +45,7 @@ new Ignitor(APP_ROOT, { importer: IMPORTER })
     app.ready(async()=>{
       await import('#start/ws')
       await import('#start/jobs/renewRentalPayment')
+      await import('#start/jobs/gracePeriodChecker')
     })
     
     app.listenIf(app.managedByPm2, 'SIGINT', () => app.terminate())
