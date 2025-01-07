@@ -19,7 +19,7 @@ export default class AnalyticsController {
             const renters = await PropertyTenant.query()
             .select(['id','property_id'])
             .whereIn('property_id',ids)
-            .andWhere('payment_status','=','paid')
+            .andWhere('payment_status','=','fully-paid')
             const uniqueRentedProperties:string[] = []
             renters.forEach((e)=>{
                 if(!uniqueRentedProperties.includes(e.property_id)){
@@ -50,7 +50,7 @@ export default class AnalyticsController {
             .query()
             .join('properties','property_tenants.property_id', '=', 'properties.id')
             .where((q)=>{
-                q.whereRaw('properties.listing_type = ? AND property_tenants.payment_status = ? AND properties.owner_id = ?',['rent','paid',user.id])
+                q.whereRaw('properties.listing_type = ? AND property_tenants.payment_status = ? AND properties.owner_id = ?',['rent','fully-paid',user.id])
             })
             .count('property_tenants.id','tenants')
 

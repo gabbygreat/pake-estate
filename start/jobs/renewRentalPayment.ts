@@ -14,7 +14,7 @@ const job = new CronJob(
         const tenants = await PropertyTenant.query()
           .select(['id'])
           .where('status', '=', 'approved')
-          .andWhere('payment_status', '=', 'paid')
+          .andWhere('payment_status', '=', 'fully-paid')
         for (const tenant of tenants) {
           const records = await RentalInvoice.query()
             .select('*')

@@ -405,7 +405,7 @@ export default class PropertyService {
 
   async userCanReview({user,property}:{user:string,property:string}):Promise<boolean>{
     const isTenant = await PropertyTenant.query().select(['id'])
-    .whereRaw('property_id=? AND applicant_id=? AND payment_status=?',[property,user,'paid'])
+    .whereRaw('property_id=? AND applicant_id=? AND payment_status=?',[property,user,'fully-paid'])
     return (isTenant[0]) ? true : false
   }
 }
