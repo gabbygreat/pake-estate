@@ -9,20 +9,18 @@ const job1 = new CronJob(
     if (!isChecking) {
       isChecking = true
       try {
-        console.log("CHECKING EXEEDED GRACE ")
         const now = new Date()
         const tenants = await PropertyTenant.query()
           .select('*')
           .where('status', '=', 'approved')
           .andWhere('payment_status', '=', 'unpaid')
           .andWhere('rent_payment_grace_period','<',now)
-          console.log(tenants.length)
         for(const tenant of tenants){
             tenant.rent_payment_grace_period = null as any
             tenant.approval_date = null as any
             tenant.status = 'rejected'
             await tenant.save()
-            await RentalInvoice.query().where((q)=>q.where('tenant_id=? AND property_id=?',[tenant.id,tenant.property_id])).delete()
+            await RentalInvoice.query().where((q)=>q.whereRaw('tenant_id=? AND property_id=?',[tenant.id,tenant.property_id])).delete()
         }
       } catch {
         isChecking = false
