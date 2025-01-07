@@ -80,6 +80,7 @@ export default class MaintenanceController {
                 return sendError(response,{message:'Invalid owner or applicant id', code:403})
             }
         } catch (error) {
+            console.log(error)
             return sendError(response,{message:error.message,error})
         }
     }
