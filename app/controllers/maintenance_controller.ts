@@ -28,7 +28,7 @@ export default class MaintenanceController {
             //check if this applicant is a member of the property
             const check = await PropertyTenant.query().select(['id']).whereRaw(`
                 property_id = ? AND applicant_id = ? AND payment_status = ?`,[property_id,applicant_id?.id,'paid'])
-            if(!check[0].id){
+            if(!check[0]){
                 return sendError(response,{message:"You are not yet a tenant!", code:403})
             }
             let maintenanceRequest: MaintenanceRequest
