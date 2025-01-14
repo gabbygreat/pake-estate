@@ -400,14 +400,12 @@ export default class PropertyService {
 
   async isSavedProperty(user:string,property:string):Promise<boolean>{
     const id = await SavedProperty.query().select(['id']).where('user_id','=',user).andWhere('property_id','=',property)
-    return id[0] ? true : false
+    return id.length ? true : false
   }
 
   async userCanReview({user,property}:{user:string,property:string}):Promise<boolean>{
     const isTenant = await PropertyTenant.query().select(['id'])
     .whereRaw('property_id=? AND applicant_id=? AND payment_status=?',[property,user,'fully-paid'])
-    console.log(isTenant[0], " IS THE PROPERTY")
-    console.log(isTenant[0] ? true : false)
-    return isTenant[0] ? true : false
+    return isTenant.length ? true : false
   }
 }
