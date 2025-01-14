@@ -31,6 +31,7 @@ export default class MaintenanceController {
             if(!check[0]){
                 return sendError(response,{message:"You are not yet a tenant!", code:403})
             }
+            console.log("YOU HAVE PAID FOR ",check[0].id)
             let maintenanceRequest: MaintenanceRequest
 
             if(applicant_id && owner_id[0]){
