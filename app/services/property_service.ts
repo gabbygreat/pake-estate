@@ -407,6 +407,6 @@ export default class PropertyService {
     const isTenant = await PropertyTenant.query().select(['id'])
     .whereRaw('property_id=? AND applicant_id=? AND payment_status=?',[property,user,'fully-paid'])
     console.log(isTenant[0])
-    return (isTenant[0]) ? true : false
+    return isTenant[0] ? true : false
   }
 }
