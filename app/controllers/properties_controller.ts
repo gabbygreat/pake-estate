@@ -303,7 +303,7 @@ export default class PropertiesController {
             if(isDraft[0] && isDraft[0].current_state === 'draft'){
                 return sendError(response,{message:"Property has not been published", code:400})
             }
-            if(!this.propertyService.userCanReview({user:user?.id!,property:property_id})){
+            if(!(await this.propertyService.userCanReview({user:user?.id!,property:property_id}))){
                 return sendError(response,{message:"You cannot review this property", code:403})
             }
             const data:Partial<PropertyReview> = {
