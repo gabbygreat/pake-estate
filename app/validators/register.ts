@@ -9,6 +9,15 @@ export const createRegistrationValidator = vine.compile(
         phone_number: vine.string().mobile(),
     })
 )
+export const createAdminRegistrationValidator = vine.compile(
+    vine.object({
+      //firstname: vine.string(),
+      fullname: vine.string(),
+      email: vine.string().trim().email(),
+      password: vine.string().trim().minLength(6),
+      //phone_number: vine.string().mobile(),
+    })
+  )
 
 createRegistrationValidator.messagesProvider = new SimpleMessagesProvider({
     "firstname.required":"Please enter your firstname",
@@ -27,6 +36,15 @@ export const googleLoginValidator = vine.compile(
         source: vine.enum(['google','facebook','apple'])
     })
 )
+createAdminRegistrationValidator.messagesProvider = new SimpleMessagesProvider(
+    {
+      'fullname.required': 'Please enter your fullname',
+      'email.email': 'A valid email address is required',
+      'password.minLength': 'Password must be at least 6 characters long',
+      //"phone_number.required":"A valid mobile number is required"
+    },
+    { email: 'Email', password: 'Password', fullname: 'FullName' }
+  )
 
 googleLoginValidator.messagesProvider = new SimpleMessagesProvider({
     "access_token.required":"Access Token is required",

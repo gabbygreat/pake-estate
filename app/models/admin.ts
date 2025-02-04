@@ -20,6 +20,9 @@ export default class Admin extends compose(BaseModel, AuthFinder) {
   @column()
   declare email: string
 
+  @column()
+  declare email_verified: boolean
+
   @column({ serializeAs: null })
   declare password: string
 
