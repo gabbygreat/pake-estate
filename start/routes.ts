@@ -18,6 +18,7 @@ import './routes/wallet-routes.js'
 import './routes/currencies-routes.js'
 import './routes/rental-invoices-routes.js'
 import './routes/analytic-routes.js'
+import './routes/admin-routes.js'
 
 router.get('/', async () => {
   return {

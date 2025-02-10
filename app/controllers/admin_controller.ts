@@ -43,7 +43,7 @@ export default class AdminController {
     try {
       const { email } = request.params()
       const user = await Admin.findBy('email', email)
-      console.log('Email:', email)
+          console.log(user)   
       if (user) {
         if (!user.email_verified) {
           const prevOTP = await this.otpService.genRedisCode({
@@ -51,15 +51,16 @@ export default class AdminController {
             code_type: 'email_verification',
           })
           await this.emailService
-            .setTemplate<VerificationEmail>('email_verification', {
-              firstname: user.fullname!,
-              verification_url: `${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${prevOTP}`,
-            })
-            .sendMail({
-              subject: 'Email Verification',
-              to: email,
-              from: 'Pake Estate Management',
-            })
+          .setTemplate<VerificationEmail>('email_verification', {
+            firstname: user.fullname!,
+            verification_url: `${env.get('WEBSITE_URL')}/verification?type=email-verification&email=${email}&token=${prevOTP}`,
+          })
+          .sendMail({
+            subject: 'Email Verification',
+            to: email,
+            from: 'Pake Estate Management',
+          })
+          console.log("GOT HERE")
           return sendSuccess(response, {
             message: 'Please verify your email address before this action.',
           })
@@ -68,7 +69,9 @@ export default class AdminController {
             user_id: user.id,
             code_type: 'password_reset',
           })
+          console.log(prevOTP);
           if (prevOTP) {
+            //console.log(`${env.get('WEBSITE_URL')}/verification?type=forgot-password&email=${email}&token=${prevOTP}`)
             await this.emailService
               .setTemplate<ForgotPasswordEmail>('forgot_password', {
                 firstname: user.fullname!,
@@ -85,6 +88,8 @@ export default class AdminController {
               user_id: user.id,
               code_type: 'password_reset',
             })
+           // console.log(`${env.get('WEBSITE_URL')}/verification?type=forgot-password&email=${email}&token=${previousOTP}`)
+
             await this.emailService
               .setTemplate<ForgotPasswordEmail>('forgot_password', {
                 firstname: user.fullname!,

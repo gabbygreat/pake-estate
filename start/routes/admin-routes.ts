@@ -6,6 +6,6 @@ router
   .group(() => {
     router.post('login', [AdminController, 'login'])
     router.post('create-admin', [AdminController, 'adminCreation'])
-    router.get('forgot-password', [AdminController, 'forgotPassword'])
+    router.get('forgot-password/:email', [AdminController, 'forgotPassword'])
   })
   .prefix('/admin')
