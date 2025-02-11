@@ -1,8 +1,5 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import { belongsTo } from '@adonisjs/lucid/orm'
-import Admin from './admin.js'
 
 export default class HomePage extends BaseModel {
   @column({ isPrimary: true })
@@ -29,6 +26,5 @@ export default class HomePage extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
  
-  @belongsTo(()=>Admin,{foreignKey:'admin_id', localKey:'id'})
-  declare currency:BelongsTo<typeof Admin>
+ 
 }
