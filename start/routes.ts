@@ -19,6 +19,7 @@ import './routes/currencies-routes.js'
 import './routes/rental-invoices-routes.js'
 import './routes/analytic-routes.js'
 import './routes/admin-routes.js'
+import './routes/home_pages-routes.js'
 
 router.get('/', async () => {
   return {
