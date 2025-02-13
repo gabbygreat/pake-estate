@@ -44,7 +44,7 @@ export default class HomePagesController {
     }
     async updateWhyChooseUs({ request, response }: HttpContext) {
         const homepage = await HomePage.create({})
-        homepage.header_Text = request.input('why_choose_us')
+        homepage.why_Choose_Us = request.input('why_choose_us')
         await homepage.save()
     
         return sendSuccess(response,{message:'Why Choose Us successfully changed'})
