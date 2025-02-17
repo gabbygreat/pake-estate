@@ -88,6 +88,6 @@ export default class AboutPagesController {
         }
         await info.save()
     
-        return sendSuccess(response,{message:'Header Text successfully changed'})
+        return sendSuccess(response,{message:'Other Info successfully changed'})
     }
 }
